@@ -1,7 +1,7 @@
 import React from 'react';
 import './Leaderboard.css';
 
-function Leaderboard({ leaderboardData, onRestart }) {
+function Leaderboard({ leaderboardData, onRestart,onReview }) {
   return (
     <div className="leaderboard">
       <h2>Final Results</h2>
@@ -14,7 +14,10 @@ function Leaderboard({ leaderboardData, onRestart }) {
           </li>
         ))}
       </ol>
-      <button className="restart-btn" onClick={onRestart}>Play Again</button>
+      <div className="final-buttons">
+        <button className="restart-btn" onClick={onReview}>Review Answers</button>
+        <button className="restart-btn" onClick={onRestart}>Play Again</button>
+      </div>
     </div>
   );
 }

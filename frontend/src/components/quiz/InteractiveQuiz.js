@@ -1,60 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './InteractiveQuiz.css';
-import { socket } from '../../socket'; // Import the socket
+import { socket } from '../../socket';
 
-function InteractiveQuiz({ quizData, roomCode, onQuizSubmit }) {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
+// This component is now simpler. It receives the question data as a prop.
+function InteractiveQuiz({ roomCode, questionData, onQuizSubmit }) {
+    const [timeRemaining, setTimeRemaining] = useState(0);
+    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [isAnswered, setIsAnswered] = useState(false);
 
-  const handleAnswerSelect = (questionIndex, answer) => {
-    setSelectedAnswers({ ...selectedAnswers, [questionIndex]: answer });
-  };
+    useEffect(() => {
+        // This effect runs whenever a new question is passed down as a prop
+        setSelectedAnswer(null); // Reset selection
+        setIsAnswered(false);   // Allow a new answer
+    }, [questionData]); // Dependency array ensures this resets for each new question
 
-  const handleSubmit = () => {
-    let score = 0;
-    quizData.forEach((question, index) => {
-      if (selectedAnswers[index] === question.correctAnswer) {
-        score++;
-      }
-    });
+    useEffect(() => {
+        // This component only needs to listen for the timer
+        socket.on('timer-tick', (data) => {
+            setTimeRemaining(data.remainingTime);
+        });
 
-    // Emit the final score to the server
-    socket.emit('submit-answers', { roomCode, score });
-    onQuizSubmit(); // Tell the parent component to switch to a "waiting" view
-  };
+        return () => {
+            socket.off('timer-tick');
+        };
+    }, []); // This only runs once
 
-  const currentQuestion = quizData[currentQuestionIndex];
+    const handleAnswerSelect = (answer) => {
+        if (!isAnswered) {
+            setSelectedAnswer(answer);
+            setIsAnswered(true);
+            socket.emit('submit-answer', {
+                roomCode,
+                questionIndex: questionData.questionIndex,
+                answer,
+            });
+        }
+    };
 
-  return (
-    <div className="interactive-quiz">
-      <h2>{currentQuestion.question}</h2>
-      <div className="options-container">
-        {currentQuestion.options.map((option, index) => (
-          <button
-            key={index}
-            className={`option-btn ${selectedAnswers[currentQuestionIndex] === option ? 'selected' : ''}`}
-            onClick={() => handleAnswerSelect(currentQuestionIndex, option)}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
-      <div className="navigation-buttons">
-        {currentQuestionIndex > 0 && (
-          <button onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}>Previous</button>
-        )}
-        {currentQuestionIndex < quizData.length - 1 && (
-          <button onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}>Next</button>
-        )}
-        {currentQuestionIndex === quizData.length - 1 && (
-          <button className="submit-btn" onClick={handleSubmit}>Submit Final Answers</button>
-        )}
-      </div>
-      <div className="progress-indicator">
-        Question {currentQuestionIndex + 1} of {quizData.length}
-      </div>
-    </div>
-  );
+    if (!questionData) {
+        return <div className="waiting-room"><h2>Loading quiz...</h2></div>;
+    }
+
+    return (
+        <div className="interactive-quiz">
+            <div className="quiz-header">
+                <span>Question {questionData.questionIndex + 1} of {questionData.totalQuestions}</span>
+                <div className="timer">{timeRemaining}s</div>
+            </div>
+            <h2>{questionData.question}</h2>
+            <div className="options-container">
+                {questionData.options.map((option, index) => (
+                    <button
+                        key={index}
+                        className={`option-btn ${selectedAnswer === option ? 'selected' : ''}`}
+                        onClick={() => handleAnswerSelect(option)}
+                        disabled={isAnswered}
+                    >
+                        {option}
+                    </button>
+                ))}
+            </div>
+            {isAnswered && <div className="feedback">Your answer has been submitted! Waiting for the next question...</div>}
+        </div>
+    );
 }
 
 export default InteractiveQuiz;
