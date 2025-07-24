@@ -1,0 +1,65 @@
+.results-screen {
+  margin-top: 2rem;
+  animation: fadeIn 0.5s;
+}
+
+.results-screen h2 {
+  text-align: center;
+  font-size: 2rem;
+  color: #28a745;
+}
+
+.results-screen h3 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.results-review {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.result-card {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 5px solid #ccc;
+}
+
+.result-card .your-answer.correct {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.result-card .your-answer.incorrect {
+  color: #dc3545;
+  text-decoration: line-through;
+}
+
+.result-card .correct-answer {
+  color: #17a2b8;
+  font-weight: bold;
+}
+
+.explanation {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #555;
+  border-top: 1px dashed #eee;
+  padding-top: 1rem;
+}
+
+.restart-btn {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

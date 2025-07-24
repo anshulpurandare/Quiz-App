@@ -1,0 +1,49 @@
+.leaderboard {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  animation: fadeIn 0.5s;
+}
+.leaderboard h2 {
+  font-size: 2.5rem;
+  color: #007bff;
+}
+.leaderboard-list {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+}
+.leaderboard-list li {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 1.2rem;
+}
+.leaderboard-list li:nth-child(1) { background: #ffd700; } /* Gold */
+.leaderboard-list li:nth-child(2) { background: #c0c0c0; } /* Silver */
+.leaderboard-list li:nth-child(3) { background: #cd7f32; } /* Bronze */
+.rank {
+  font-weight: bold;
+  margin-right: 1.5rem;
+}
+.name {
+  flex-grow: 1;
+  text-align: left;
+}
+.score {
+  font-weight: bold;
+  color: #007bff;
+}
+.restart-btn {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 4px;
+}
