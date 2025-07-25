@@ -136,7 +136,6 @@
 .host-controls .end-btn {
   background-color: #dc3545;
 }
-/* Add these new styles for the distribution chart */
 .distribution-chart {
     margin-top: 2rem;
     width: 100%;
@@ -144,8 +143,9 @@
 
 .distribution-chart h4 {
     margin-bottom: 1rem;
-    color: #ccc;
-    font-weight: 500;
+    color: #4a4a4a; /* FIX: Darker heading for better contrast */
+    font-weight: 600;
+    text-align: center;
 }
 
 .bar-item {
@@ -155,32 +155,34 @@
 }
 
 .bar-label {
-    width: 30%;
+    width: 25%;
     text-align: right;
     padding-right: 1rem;
     font-size: 0.9rem;
-    color: #eee;
+    font-weight: 500;
+    color: #555; /* FIX: Darker label color */
 }
 
 .bar-wrapper {
     flex-grow: 1;
-    background-color: #3a3f5c;
+    background-color: #e0e0e0; /* A light gray background for the track */
     border-radius: 4px;
-    height: 24px;
+    height: 28px;
     overflow: hidden;
 }
 
 .bar {
     height: 100%;
-    background: linear-gradient(90deg, #4d57c1, #6c63ff);
+    /* FIX: Use a more vibrant gradient that fits your theme */
+    background: linear-gradient(90deg, #6265f7, #9863ff);
     border-radius: 4px;
     transition: width 0.3s ease-in-out;
 }
 
 .bar-count {
-    width: 10%;
+    width: 15%;
     text-align: left;
     padding-left: 1rem;
     font-weight: bold;
-    color: #fff;
+    color: #333; /* FIX: Darker text for the count */
 }

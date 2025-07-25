@@ -44,19 +44,27 @@
 }
 
 .review-option {
-    padding: 10px;
-    margin: 5px 0;
-    border: 1px solid #444;
-    border-radius: 5px;
+    padding: 12px 15px;
+    margin: 8px 0;
+    border: 1px solid #4a5070;
+    border-radius: 8px;
     background-color: #3a3f5c;
+    color: #f0f0f0; /* FIX: Make the default text color light */
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
 }
+
 .review-option.correct {
-    background-color: #28a745; /* Green */
-    border-color: #28a745;
+    background-color: #27ae60; /* A slightly softer, modern green */
+    border-color: #27ae60;
     color: white;
+    font-weight: 700; /* Make it bold */
 }
+
 .review-option.incorrect {
-    background-color: #dc3545; /* Red */
-    border-color: #dc3545;
+    background-color: #e74c3c; /* A slightly softer, modern red */
+    border-color: #e74c3c;
     color: white;
+    font-weight: 700; /* Make it bold */
 }
+
