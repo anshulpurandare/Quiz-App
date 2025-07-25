@@ -89,3 +89,23 @@
 .final-buttons button:first-child:hover {
   background: #0056b3;
 }
+.answer-recap {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 600px;
+    margin: 1rem auto 2rem;
+    padding: 1rem;
+    background-color: #2c2f48;
+    border-radius: 8px;
+}
+.recap-item {
+    font-size: 1.1rem;
+    color: #ccc;
+}
+.recap-item span {
+    font-weight: bold;
+    color: #fff;
+}
+.recap-item.correct span { color: #28a745; }
+.recap-item.incorrect span { color: #dc3545; }

@@ -1,10 +1,18 @@
 import React from 'react';
 import './Leaderboard.css'; // We can reuse the same CSS
 
-function LiveLeaderboard({ leaderboardData, correctAnswer }) {
+function LiveLeaderboard({ leaderboardData, correctAnswer, yourAnswer }) {
+  const isCorrect= yourAnswer === correctAnswer;  
   return (
     <div className="leaderboard live">
-      <h2>Current Standings</h2>
+      <h2>Current Standings</h2><h2>Live Standings</h2>
+            {/* --- ADD THIS SECTION --- */}
+            <div className="answer-recap">
+                <div className="recap-item">Correct Answer: <span>{correctAnswer}</span></div>
+                <div className={`recap-item ${isCorrect ? 'correct' : 'incorrect'}`}>
+                    Your Answer: <span>{yourAnswer}</span>
+                </div>
+            </div>
       <p className="correct-answer-reveal">The correct answer was: <strong>{correctAnswer}</strong></p>
       <ol className="leaderboard-list">
         {leaderboardData.map((player) => (

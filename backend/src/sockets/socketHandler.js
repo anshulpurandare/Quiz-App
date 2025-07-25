@@ -20,7 +20,7 @@ function advanceGame(io, roomCode) {
                 name: p.name,
                 score: room.scores[p.id] || 0
             })).sort((a, b) => b.score - a.score);
-            io.to(roomCode).emit('game-over', { leaderboard: finalLeaderboard, quizData: room.quiz });
+            io.to(roomCode).emit('game-over', { leaderboard: finalLeaderboard, quizData: room.quiz,playerAnswers: room.playerAnswers });
             return;
         }
 
@@ -52,7 +52,17 @@ function advanceGame(io, roomCode) {
             score: room.scores[p.id] || 0
         })).sort((a, b) => b.score - a.score);
         io.to(roomCode).emit('update-leaderboard', leaderboard);
-        io.to(roomCode).emit('question-over', { correctAnswer });
+        room.participants.forEach(p => {
+            const theirAnswer = room.playerAnswers[p.id]?.[questionIndex] || "No Answer";
+            io.to(p.id).emit('question-over', { 
+                correctAnswer: correctAnswer,
+                yourAnswer: theirAnswer 
+            });
+        });
+        io.to(room.hostId).emit('question-over', {
+            correctAnswer: correctAnswer,
+            yourAnswer: null 
+        });
 
         setTimeout(() => advanceGame(io, roomCode), 5000);
     }
@@ -81,6 +91,9 @@ function initializeSocket(io) {
                 socket.join(roomCode);
                 const newParticipant = { id: socket.id, name };
                 rooms[roomCode].participants.push(newParticipant);
+                if (rooms[roomCode].playerAnswers) {
+                    rooms[roomCode].playerAnswers[socket.id] = [];
+                }
                 io.to(roomCode).emit('update-participants', rooms[roomCode].participants);
                 callback({ success: true, roomData: rooms[roomCode] });
             } else {
@@ -113,6 +126,11 @@ function initializeSocket(io) {
                 room.phase = 'results';
                 room.answeredThisRound = [];
                 room.answerDistribution = {}; 
+                room.playerAnswers = {};
+                room.participants.forEach(p => {
+                    room.playerAnswers[p.id] = [];
+                });
+                room.playerAnswers[room.hostId] = [];   
                 advanceGame(io, roomCode);
             }
         });
@@ -120,17 +138,19 @@ function initializeSocket(io) {
         socket.on('submit-answer', ({ roomCode, questionIndex, answer }) => {
             const room = rooms[roomCode];
             if (room && room.quiz && room.quiz[questionIndex] && !room.answeredThisRound.includes(socket.id)) {
-            room.answeredThisRound.push(socket.id);
-            if (!room.answerDistribution[answer]) {
-                room.answerDistribution[answer] = 0;
-            }
-        room.answerDistribution[answer]++;
+                room.answeredThisRound.push(socket.id);
+                if (!room.answerDistribution[answer]) {
+                    room.answerDistribution[answer] = 0;
+                }
+                room.answerDistribution[answer]++;
                 const isCorrect = room.quiz[questionIndex].correctAnswer === answer;
                 if (isCorrect) {
                     if (!room.scores[socket.id]) { room.scores[socket.id] = 0; }
                     room.scores[socket.id]++;
                 }
-
+                if (room.playerAnswers && room.playerAnswers[socket.id]) {
+                    room.playerAnswers[socket.id][questionIndex] = answer;
+                }
                 // Notify the host about the new submission
                 io.to(room.hostId).emit('host-update', {
                     answeredThisRound: room.answeredThisRound,
@@ -158,8 +178,7 @@ function initializeSocket(io) {
             const room = rooms[roomCode];
             if (room && room.hostId === socket.id) {
                 console.log(`Host ended quiz in room [${roomCode}]`);
-                // The endGame function is now part of advanceGame, so we can call it directly
-                // For simplicity, we'll just clear the timer and call the game-over logic
+                
                 if (room.timer) clearInterval(room.timer);
                 const finalLeaderboard = room.participants.map(p => ({
                     name: p.name, score: room.scores[p.id] || 0

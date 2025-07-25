@@ -1,10 +1,10 @@
+require('dotenv').config(); // Make sure dotenv is installed
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors'); // Make sure cors is installed
 const initializeSocket = require('./sockets/socketHandler');
 
-require('dotenv').config(); // Make sure dotenv is installed
 
 const app = express();
 const server = http.createServer(app);

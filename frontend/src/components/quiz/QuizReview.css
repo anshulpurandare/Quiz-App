@@ -42,3 +42,21 @@
   width: 100%;
   margin-top: 1rem;
 }
+
+.review-option {
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #444;
+    border-radius: 5px;
+    background-color: #3a3f5c;
+}
+.review-option.correct {
+    background-color: #28a745; /* Green */
+    border-color: #28a745;
+    color: white;
+}
+.review-option.incorrect {
+    background-color: #dc3545; /* Red */
+    border-color: #dc3545;
+    color: white;
+}

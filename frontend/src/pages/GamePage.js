@@ -14,6 +14,7 @@ import './GamePage.css';
 function GamePage() {
     const [view, setView] = useState('lobby');
     const [error, setError] = useState('');
+    const [myAnswers, setMyAnswers] = useState([]);
     
     // User & Room State
     const [name, setName] = useState('');
@@ -49,6 +50,7 @@ function GamePage() {
 
             socket.on('question-over', (data) => {
                 setCorrectAnswer(data.correctAnswer);
+                setMyAnswers(prev => [...prev, data.yourAnswer]); 
                 setView('live_leaderboard');
             });
 
@@ -56,6 +58,9 @@ function GamePage() {
                 if (data && data.leaderboard) {
                     setLeaderboard(data.leaderboard);
                     setFullQuizData(data.quizData);
+                    if (data.playerAnswers && data.playerAnswers[socket.id]) {
+                        setMyAnswers(data.playerAnswers[socket.id]);
+                    }
                     setView('leaderboard');
                 }
             });
@@ -170,9 +175,9 @@ function GamePage() {
             case 'host_monitor': return <HostDashboard roomCode={roomCode}  questionData={currentQuestion} participants={participants} />;
             case 'quiz': return <InteractiveQuiz roomCode={roomCode} questionData={currentQuestion} onQuizSubmit={handleQuizSubmit} />;
             case 'waiting_results': return <div className="waiting-room"><h2>Answers Submitted!</h2><p>Waiting for other players to finish...</p></div>;
-            case 'live_leaderboard': return <LiveLeaderboard leaderboardData={leaderboard} correctAnswer={correctAnswer} />;
+            case 'live_leaderboard': const myLastAnswer = myAnswers[myAnswers.length - 1]; return <LiveLeaderboard leaderboardData={leaderboard} correctAnswer={correctAnswer} yourAnswer={myLastAnswer} />;
             case 'leaderboard': return <Leaderboard leaderboardData={leaderboard} onRestart={handleRestart} onReview={handleShowReview} />;
-            case 'quiz_review': return <QuizReview quizData={fullQuizData} onRestart={handleRestart} />;
+            case 'quiz_review': return <QuizReview quizData={fullQuizData} myAnswers={myAnswers} onRestart={handleRestart} />;
 
             default: return renderLobby();
         }
