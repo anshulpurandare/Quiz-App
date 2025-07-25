@@ -67,7 +67,13 @@ function initializeSocket(io) {
             const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
             socket.join(roomCode);
             rooms[roomCode] = { hostId: socket.id, participants: [], quiz: null, scores: {} };
-            callback({ roomCode });
+            // Only execute the callback if it was actually provided.
+            if (callback && typeof callback === 'function') {
+                callback({ roomCode });
+            } else {
+                // This log helps with debugging if it happens again.
+                console.log(`Client ${socket.id} created room ${roomCode} but provided no callback.`);
+            }
         });
 
         socket.on('join-room', ({ roomCode, name }, callback) => {
