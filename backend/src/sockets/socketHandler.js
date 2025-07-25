@@ -2,22 +2,19 @@ const { generateQuiz } = require('../services/aiService');
 
 const rooms = {};
 
-// --- A NEW, UNIFIED GAME LOOP FUNCTION ---
-// This single function now controls all game state transitions.
 function advanceGame(io, roomCode) {
     const room = rooms[roomCode];
     if (!room || !room.quiz) return;
 
-    // Clear any existing timers to prevent duplicates and ghost timers.
     if (room.timer) clearInterval(room.timer);
 
-    // If the last phase was showing results, it's time for the next question.
     if (room.phase === 'results') {
+        room.answeredThisRound = [];
+        room.answerDistribution = {};
         room.currentQuestionIndex++;
         const questionIndex = room.currentQuestionIndex;
         const question = room.quiz[questionIndex];
 
-        // If there are no more questions, end the game.
         if (!question) {
             const finalLeaderboard = room.participants.map(p => ({
                 name: p.name,
@@ -27,7 +24,6 @@ function advanceGame(io, roomCode) {
             return;
         }
 
-        // Otherwise, start the new question phase.
         room.phase = 'question';
         io.to(roomCode).emit('new-question', {
             question: question.question,
@@ -36,25 +32,21 @@ function advanceGame(io, roomCode) {
             totalQuestions: room.quiz.length,
         });
 
-        // Start the timer for this new question.
         let remainingTime = room.timerDuration;
         room.timer = setInterval(() => {
             io.to(roomCode).emit('timer-tick', { remainingTime });
             remainingTime--;
             if (remainingTime < 0) {
-                // When time is up, call this same function to advance to the results phase.
                 advanceGame(io, roomCode);
             }
         }, 1000);
 
     } 
-    // If the last phase was a question, it's now time to show the results.
     else if (room.phase === 'question') {
         room.phase = 'results';
         const questionIndex = room.currentQuestionIndex;
         const correctAnswer = room.quiz[questionIndex].correctAnswer;
 
-        // Broadcast the live leaderboard and the correct answer.
         const leaderboard = room.participants.map(p => ({
             name: p.name,
             score: room.scores[p.id] || 0
@@ -62,10 +54,10 @@ function advanceGame(io, roomCode) {
         io.to(roomCode).emit('update-leaderboard', leaderboard);
         io.to(roomCode).emit('question-over', { correctAnswer });
 
-        // Wait 5 seconds, then call this same function to advance to the next question.
         setTimeout(() => advanceGame(io, roomCode), 5000);
     }
 }
+
 
 function initializeSocket(io) {
     io.on('connection', (socket) => {
@@ -104,36 +96,139 @@ function initializeSocket(io) {
             }
         });
 
-        // --- THE CORRECTED 'start-quiz' HANDLER ---
-        // This is now much simpler and only kicks off the game loop.
+
         socket.on('start-quiz', ({ roomCode, timerDuration }) => {
             const room = rooms[roomCode];
             if (room && room.quiz && room.hostId === socket.id) {
-                // Initialize the game state.
-                room.currentQuestionIndex = -1; // Start at -1 so the first advance call sets it to 0.
+                // Initialize the game state
+                room.currentQuestionIndex = -1;
                 room.scores = {};
                 room.timerDuration = timerDuration || 15;
-                room.phase = 'results'; // Set initial phase so the first advance call starts a question.
-
-                // Kick off the unified game loop for the very first time.
+                room.phase = 'results';
+                room.answeredThisRound = [];
+                room.answerDistribution = {}; 
                 advanceGame(io, roomCode);
             }
         });
 
         socket.on('submit-answer', ({ roomCode, questionIndex, answer }) => {
             const room = rooms[roomCode];
-            if (room && room.quiz && room.quiz[questionIndex]) {
+            if (room && room.quiz && room.quiz[questionIndex] && !room.answeredThisRound.includes(socket.id)) {
+            room.answeredThisRound.push(socket.id);
+            if (!room.answerDistribution[answer]) {
+                room.answerDistribution[answer] = 0;
+            }
+        room.answerDistribution[answer]++;
                 const isCorrect = room.quiz[questionIndex].correctAnswer === answer;
                 if (isCorrect) {
                     if (!room.scores[socket.id]) { room.scores[socket.id] = 0; }
                     room.scores[socket.id]++;
                 }
+
+                // Notify the host about the new submission
+                io.to(room.hostId).emit('host-update', {
+                    answeredThisRound: room.answeredThisRound,
+                    answerDistribution: room.answerDistribution
+                });
+                 io.to(roomCode).emit('update-answer-progress', {
+                    answeredCount: room.answeredThisRound.length,
+                    totalParticipants: room.participants.length
+                });
+            }
+        });
+        
+        socket.on('host-skip-question', (roomCode) => {
+            const room = rooms[roomCode];
+            if (room && room.hostId === socket.id) {
+                console.log(`Host skipped question in room [${roomCode}]`);
+                // Advancing the game from a 'question' phase moves it to 'results'
+                if (room.phase === 'question') {
+                    advanceGame(io, roomCode);
+                }
+            }
+        });
+
+        socket.on('host-end-quiz', (roomCode) => {
+            const room = rooms[roomCode];
+            if (room && room.hostId === socket.id) {
+                console.log(`Host ended quiz in room [${roomCode}]`);
+                // The endGame function is now part of advanceGame, so we can call it directly
+                // For simplicity, we'll just clear the timer and call the game-over logic
+                if (room.timer) clearInterval(room.timer);
+                const finalLeaderboard = room.participants.map(p => ({
+                    name: p.name, score: room.scores[p.id] || 0
+                })).sort((a, b) => b.score - a.score);
+                io.to(roomCode).emit('game-over', { leaderboard: finalLeaderboard, quizData: room.quiz });
             }
         });
         
         socket.on('disconnect', () => {
-            console.log(`User disconnected: ${socket.id}`);
+            console.log(`User disconnected with socket ID: ${socket.id}`);
+            const disconnectedSocketId = socket.id;
+
+            // Find the room the disconnected user was in.
+            const roomCode = Object.keys(rooms).find(key => {
+                const room = rooms[key];
+                const isParticipant = room.participants.some(p => p.id === disconnectedSocketId);
+                return room.hostId === disconnectedSocketId || isParticipant;
+            });
+
+            if (!roomCode) {
+                console.log(`Disconnected user ${disconnectedSocketId} was not in any active room.`);
+                return;
+            }
+
+            const room = rooms[roomCode];
+
+            // --- THIS IS THE LOGIC WE ARE IMPLEMENTING ---
+            // Case 1: The Host disconnected. The game ends.
+            if (room.hostId === disconnectedSocketId) {
+                console.log(`Host disconnected from room [${roomCode}]. Ending game for all.`);
+                
+                // Notify all remaining clients that the host left and the game is over.
+                io.to(roomCode).emit('host-disconnected');
+
+                // Clean up the room from memory.
+                if (room.timer) clearInterval(room.timer);
+                delete rooms[roomCode];
+            } 
+            // Case 2: A Participant disconnected.
+            else {
+                const participantIndex = room.participants.findIndex(p => p.id === disconnectedSocketId);
+                if (participantIndex !== -1) {
+                    const participantName = room.participants[participantIndex].name;
+                    console.log(`Participant "${participantName}" disconnected from room [${roomCode}].`);
+
+                    // Remove the participant from the list.
+                    room.participants.splice(participantIndex, 1);
+                    
+                    // Broadcast the updated participant list to everyone in the room.
+                    io.to(roomCode).emit('update-participants', room.participants);
+
+                    // If a quiz is in progress, update the live progress indicators.
+                    if (room.phase === 'question') {
+                        const answeredIndex = room.answeredThisRound.indexOf(disconnectedSocketId);
+                        if (answeredIndex > -1) {
+                            room.answeredThisRound.splice(answeredIndex, 1);
+                        }
+
+                        io.to(room.hostId).emit('host-update', {
+                            answeredThisRound: room.answeredThisRound,
+                            answerDistribution: room.answerDistribution
+                        });
+                        
+                        io.to(roomCode).emit('update-answer-progress', {
+                            answeredCount: room.answeredThisRound.length,
+                            totalParticipants: room.participants.length
+                        });
+                    }
+                }
+            }
         });
+
     });
 }
+// Add this to the top of the advanceGame function
+// if (room.phase === 'results') { room.answeredThisRound = []; ... }
 module.exports = initializeSocket;
+

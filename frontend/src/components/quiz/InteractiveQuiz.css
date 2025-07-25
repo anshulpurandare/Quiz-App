@@ -92,3 +92,22 @@
   color: #28a745;
   animation: fadeIn 0.3s;
 }
+/* Add these styles for the progress indicator */
+.feedback {
+    margin-top: 1.5rem;
+    color: #aeb8c4;
+    font-style: italic;
+    height: 20px; /* Give it a fixed height to prevent layout shift */
+}
+
+.progress-indicator {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 0.9rem;
+}

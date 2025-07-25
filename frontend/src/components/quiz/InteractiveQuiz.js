@@ -2,26 +2,29 @@ import React, { useState, useEffect } from 'react';
 import './InteractiveQuiz.css';
 import { socket } from '../../socket';
 
-// This component is now simpler. It receives the question data as a prop.
 function InteractiveQuiz({ roomCode, questionData, onQuizSubmit }) {
     const [timeRemaining, setTimeRemaining] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
+    const [progress, setProgress] = useState({ answeredCount: 0, totalParticipants: 0 });
 
     useEffect(() => {
-        // This effect runs whenever a new question is passed down as a prop
-        setSelectedAnswer(null); // Reset selection
-        setIsAnswered(false);   // Allow a new answer
-    }, [questionData]); // Dependency array ensures this resets for each new question
+        setSelectedAnswer(null);
+        setIsAnswered(false);
+        setProgress({ answeredCount: 0, totalParticipants: 0 });
+    }, [questionData]);
 
     useEffect(() => {
-        // This component only needs to listen for the timer
         socket.on('timer-tick', (data) => {
             setTimeRemaining(data.remainingTime);
+        });
+        socket.on('update-answer-progress', (data) => {
+            setProgress(data);
         });
 
         return () => {
             socket.off('timer-tick');
+            socket.off('update-answer-progress');
         };
     }, []); // This only runs once
 
@@ -60,7 +63,15 @@ function InteractiveQuiz({ roomCode, questionData, onQuizSubmit }) {
                     </button>
                 ))}
             </div>
-            {isAnswered && <div className="feedback">Your answer has been submitted! Waiting for the next question...</div>}
+            <div className="feedback">
+                {isAnswered 
+                    ? "Your answer has been submitted! Waiting for results..."
+                    : "Select your answer above."
+                }
+            </div>
+            <div className="progress-indicator">
+                <span>{progress.answeredCount} of {progress.totalParticipants} have answered</span>
+            </div>
         </div>
     );
 }

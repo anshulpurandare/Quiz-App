@@ -1,40 +1,28 @@
-require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors');
-
-// Import our refactored modules
-const quizRoutes = require('./api/quizRoutes');
+const cors = require('cors'); // Make sure cors is installed
 const initializeSocket = require('./sockets/socketHandler');
 
+require('dotenv').config(); // Make sure dotenv is installed
+
 const app = express();
-
-// --- Middleware Setup ---
-app.use(cors()); 
-app.use(express.json());
-
-// --- Server Initialization ---
 const server = http.createServer(app);
+
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Allow dev and production
+    methods: ["GET", "POST"]
+};
+
+app.use(cors(corsOptions));
+
 const io = new Server(server, {
-    cors: {
-        // Only allow connections from the local React development server
-        origin: "http://localhost:3000",
-        methods: ["GET", "POST"]
-    }
+    cors: corsOptions 
 });
 
-// --- Route and Socket Initialization ---
-app.use('/api', quizRoutes); 
-initializeSocket(io); 
+initializeSocket(io);
 
-// --- Health Check Endpoint ---
-app.get('/', (req, res) => {
-    res.send('Multiplayer Quiz Backend is running and healthy!');
-});
-
-// --- Start the Server for Local Development ---
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });

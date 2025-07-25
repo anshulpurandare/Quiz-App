@@ -1,0 +1,186 @@
+.host-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 900px) {
+  .host-dashboard {
+    flex-direction: row;
+  }
+}
+
+.question-panel {
+  flex: 2;
+  padding-right: 2rem;
+  border-right: 1px solid #eee;
+}
+
+.question-panel h3 {
+  color: #666;
+  font-weight: 600;
+}
+.question-panel h2 {
+  font-size: 1.75rem;
+  line-height: 1.4;
+  margin-bottom: 2rem;
+}
+
+.options-preview {
+  display: grid;
+  gap: 1rem;
+}
+
+.option-preview {
+  padding: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+}
+
+.option-preview.correct {
+  border-color: #28a745;
+  background-color: #e9f7ef;
+  font-weight: 600;
+  position: relative;
+}
+
+.option-preview.correct::after {
+  content: '✔';
+  position: absolute;
+  right: 1rem;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.status-item {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.status-item > span:first-child {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.timer-display {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #007bff;
+  text-align: center;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 20px;
+  background: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(45deg, #28a745, #20c997);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  text-align: center;
+  display: block;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+.participants ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 150px;
+  overflow-y: auto;
+}
+.participants li {
+  padding: 0.3rem 0;
+  transition: color 0.3s;
+}
+.participants li.answered {
+  color: #28a745;
+  font-weight: 600;
+}
+.participants li.answered::after {
+  content: ' ✓';
+}
+
+.host-controls {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 1rem;
+}
+.host-controls button {
+  width: 100%;
+  background-color: #6c757d;
+}
+.host-controls .end-btn {
+  background-color: #dc3545;
+}
+/* Add these new styles for the distribution chart */
+.distribution-chart {
+    margin-top: 2rem;
+    width: 100%;
+}
+
+.distribution-chart h4 {
+    margin-bottom: 1rem;
+    color: #ccc;
+    font-weight: 500;
+}
+
+.bar-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.bar-label {
+    width: 30%;
+    text-align: right;
+    padding-right: 1rem;
+    font-size: 0.9rem;
+    color: #eee;
+}
+
+.bar-wrapper {
+    flex-grow: 1;
+    background-color: #3a3f5c;
+    border-radius: 4px;
+    height: 24px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4d57c1, #6c63ff);
+    border-radius: 4px;
+    transition: width 0.3s ease-in-out;
+}
+
+.bar-count {
+    width: 10%;
+    text-align: left;
+    padding-left: 1rem;
+    font-weight: bold;
+    color: #fff;
+}

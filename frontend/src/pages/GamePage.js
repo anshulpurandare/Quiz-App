@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../socket';
-
 // Import all view components
+import HostDashboard from '../components/lobby/HostDashboard';
 import HostView from '../components/lobby/HostView';
 import ParticipantView from '../components/lobby/ParticipantView';
 import InteractiveQuiz from '../components/quiz/InteractiveQuiz';
@@ -39,12 +39,11 @@ function GamePage() {
                 setView(isHost ? 'host_monitor' : 'quiz');
             });
 
-            // --- THIS IS THE CRITICAL FIX ---
-            // This listener now also handles switching the view back to the quiz
+            
             socket.on('new-question', (newQuestionData) => {
                 setCurrentQuestion(newQuestionData);
-                setView(isHost ? 'host_monitor' : 'quiz'); // This line was missing
-            });
+                setView(isHost ? 'host_monitor' : 'quiz'); 
+            })
             
             socket.on('update-leaderboard', setLeaderboard);
 
@@ -60,6 +59,11 @@ function GamePage() {
                     setView('leaderboard');
                 }
             });
+            socket.on('host-disconnected', () => {
+                alert('The host has disconnected. The game has ended. Returning to the main screen.');
+                // Your existing handleRestart function is perfect for resetting the UI.
+                handleRestart(); 
+            });
         }
         setupSocketListeners();
 
@@ -70,6 +74,7 @@ function GamePage() {
             socket.off('update-leaderboard');
             socket.off('question-over');
             socket.off('game-over');
+            socket.off('host-disconnected'); 
         };
     }, [isHost]);
 
@@ -162,12 +167,13 @@ function GamePage() {
     const renderContent = () => {
         switch (view) {
             case 'waiting': return isHost ? <HostView roomCode={roomCode} participants={participants} socket={socket} /> : <ParticipantView roomCode={roomCode} participants={participants} name={name} />;
-            case 'host_monitor': return <div className="waiting-room"><h2>Quiz in Progress...</h2></div>;
+            case 'host_monitor': return <HostDashboard roomCode={roomCode}  questionData={currentQuestion} participants={participants} />;
             case 'quiz': return <InteractiveQuiz roomCode={roomCode} questionData={currentQuestion} onQuizSubmit={handleQuizSubmit} />;
             case 'waiting_results': return <div className="waiting-room"><h2>Answers Submitted!</h2><p>Waiting for other players to finish...</p></div>;
             case 'live_leaderboard': return <LiveLeaderboard leaderboardData={leaderboard} correctAnswer={correctAnswer} />;
             case 'leaderboard': return <Leaderboard leaderboardData={leaderboard} onRestart={handleRestart} onReview={handleShowReview} />;
             case 'quiz_review': return <QuizReview quizData={fullQuizData} onRestart={handleRestart} />;
+
             default: return renderLobby();
         }
     };
