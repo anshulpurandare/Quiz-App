@@ -1,12 +1,16 @@
-
 /* src/components/quiz/QuizReview.css */
 
 /* --- General Styles for Both Views --- */
 .quiz-review, .quiz-review-container {
-
-.quiz-review {
-
-  animation: fadeIn 0.5s;
+  max-width: 900px;
+  margin: 2rem auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  background: #fff;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -14,14 +18,9 @@
   to { opacity: 1; }
 }
 
-/* --- Styles for Host's Pre-Game Review & Editor --- */
+/* --- Host Review / Editor Styles --- */
 .quiz-review-container {
-  padding: 2rem;
   background-color: #f4f7f9;
-  border-radius: 12px;
-  max-width: 900px;
-  margin: 2rem auto;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .review-header {
@@ -79,15 +78,35 @@
   color: #007bff;
 }
 
-.question-input {
+.question-header button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.question-header button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.question-header button:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.question-editor textarea.question-input {
   width: 100%;
-  padding: 0.8rem;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
   font-family: inherit;
-  resize: none; /* Often better to disable resize for a clean look */
   background-color: #f8f9fa;
+  padding: 0.8rem;
+  resize: none; /* disable resizing */
 }
 
 .options-review-list {
@@ -97,6 +116,117 @@
   gap: 0.8rem;
 }
 
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+/* (The above repeated style blocks appear to be a duplication error; ignoring duplicates.) */
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+.review-header,
+.options-review-list,
+.question-editor {
+  word-wrap: break-word;
+}
+
+/* Base styles for review items */
 .review-option-item {
   padding: 0.8rem;
   border: 1px solid #e0e0e0;
@@ -106,14 +236,15 @@
   word-wrap: break-word;
 }
 
-/* This is the key style for the host's view */
+/* Highlight correct options */
 .review-option-item.correct {
-  background-color: #d4edda; /* Light green */
+  background-color: #d4edda; /* light green */
   border-color: #28a745;
   color: #155724;
   font-weight: 600;
 }
 
+/* Action buttons container */
 .review-actions {
   margin-top: 2rem;
   display: flex;
@@ -128,6 +259,7 @@
   border: none;
   cursor: pointer;
   font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
 .approve-btn {
@@ -135,26 +267,68 @@
   color: white;
 }
 
+.approve-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
 .regenerate-btn {
   background-color: #ffc107;
   color: #212529;
 }
 
+.regenerate-btn:hover:not(:disabled) {
+  background-color: #e0a800;
+}
+
+.regenerate-btn:disabled,
+.approve-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.regenerate-btn:disabled {
+  background-color: #ffe8a1;
+}
+
+.regenerate-btn:active {
+  transform: scale(0.98);
+}
+
+.regenerate-btn,
+.approve-btn {
+  user-select: none;
+}
+
+/* Regenerate single question button */
 .regenerate-question-btn {
   background-color: #dc3545;
   color: white;
+  border: none;
   padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
-/* --- Styles for Participant's Post-Game Review --- */
+.regenerate-question-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.regenerate-question-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* --- Participant Post-Game Review Styles --- */
 .review-card {
   background: #fff;
   padding: 1.5rem;
   border-radius: 12px;
-  border-left: 5px solid #17a2b8;
+  border-left: 5px solid #17a2b8; /* blue accent */
   margin-bottom: 1.5rem;
   text-align: left;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
 .review-card h4 {
@@ -170,52 +344,36 @@
   margin-top: 1rem;
 }
 
+/* Base option style */
 .review-option {
-
   padding: 12px 15px;
-  margin: 0;
-  border: 1px solid #e0e0e0;
+  margin: 8px 0;
+  border: 1px solid #4a5070;
   border-radius: 8px;
+  background-color: #3a3f5c;
+  color: #f0f0f0;
   font-weight: 500;
-=======
-    padding: 12px 15px;
-    margin: 8px 0;
-    border: 1px solid #4a5070;
-    border-radius: 8px;
-    background-color: #3a3f5c;
-    color: #f0f0f0; 
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease;
 }
 
-/* Key styles for participant's correct vs incorrect answers */
+/* Correct answers */
 .review-option.correct {
-  background-color: #27ae60;
+  background-color: #27ae60; /* green */
   border-color: #27ae60;
   color: white;
   font-weight: 700;
 }
 
+/* Incorrect answers */
 .review-option.incorrect {
-  background-color: #e74c3c;
+  background-color: #e74c3c; /* red */
   border-color: #e74c3c;
   color: white;
   font-weight: 700;
   text-decoration: line-through;
-=======
-    background-color: #27ae60;
-    border-color: #27ae60;
-    color: white;
-    font-weight: 700;
 }
 
-.review-option.incorrect {
-    background-color: #e74c3c;
-    border-color: #e74c3c;
-    color: white;
-    font-weight: 700;
-}
-
+/* Explanation text */
 .explanation {
   margin-top: 1rem;
   font-size: 0.95rem;

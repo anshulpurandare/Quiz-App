@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../../socket';
 import './QuizReview.css';
+
 function QuizReview({
     initialQuizData,
     roomCode,
@@ -14,10 +15,12 @@ function QuizReview({
     const [isSaving, setIsSaving] = useState(false);
     const [regeneratingIndex, setRegeneratingIndex] = useState(null);
 
+    // Update local quiz data if props change
     useEffect(() => {
         setQuizData(initialQuizData);
     }, [initialQuizData]);
 
+    // Listen for single question updates from the server
     useEffect(() => {
         const handleSingleQuestionUpdated = ({ questionIndex, newQuestion }) => {
             setQuizData(prevData => {
@@ -31,15 +34,17 @@ function QuizReview({
         socket.on('single-question-updated', handleSingleQuestionUpdated);
 
         return () => {
-            socket.off('single-question-updated');
+            socket.off('single-question-updated', handleSingleQuestionUpdated);
         };
     }, []);
 
+    // Called when host clicks to regenerate a specific question
     const handleRegenerateQuestion = (index) => {
         setRegeneratingIndex(index);
         socket.emit('host-regenerate-single-question', { roomCode, questionIndex: index });
     };
 
+    // Host approves the quiz and starts the game
     const handleApproveAndStart = () => {
         setIsSaving(true);
         socket.emit('host-update-quiz', { roomCode, updatedQuiz: quizData });
@@ -54,12 +59,15 @@ function QuizReview({
     };
 
     if (isHostReview) {
+        // Host review mode - show editable quiz with regenerate buttons
         return (
             <div className="quiz-review-container">
-                {/* --- [NEW] Header section with Room Code --- */}
                 <div className="review-header">
                     <h2>Review and Edit Your Quiz</h2>
-                    <p>Share this code with participants: <span className="room-code-display">{roomCode}</span></p>
+                    <p>
+                        Share this code with participants:{' '}
+                        <span className="room-code-display">{roomCode}</span>
+                    </p>
                 </div>
 
                 <div className="questions-list">
@@ -75,12 +83,19 @@ function QuizReview({
                                     {regeneratingIndex === qIndex ? 'Regenerating...' : 'Regenerate'}
                                 </button>
                             </div>
-                            <textarea value={q.question} className="question-input" readOnly />
+                            <textarea
+                                value={q.question}
+                                className="question-input"
+                                readOnly
+                                rows={3}
+                            />
                             <div className="options-review-list">
-                                {q.options && q.options.map((option, oIndex) => (
+                                {q.options?.map((option, oIndex) => (
                                     <div
                                         key={oIndex}
-                                        className={`review-option-item ${option === q.correctAnswer ? 'correct' : ''}`}
+                                        className={`review-option-item ${
+                                            option === q.correctAnswer ? 'correct' : ''
+                                        }`}
                                     >
                                         {option}
                                     </div>
@@ -89,11 +104,20 @@ function QuizReview({
                         </div>
                     ))}
                 </div>
+
                 <div className="review-actions">
-                    <button onClick={handleApproveAndStart} disabled={isSaving} className="approve-btn">
+                    <button
+                        onClick={handleApproveAndStart}
+                        disabled={isSaving}
+                        className="approve-btn"
+                    >
                         {isSaving ? 'Saving...' : 'Approve & Start Quiz'}
                     </button>
-                    <button onClick={onRegenerate} className="regenerate-btn" disabled={isSaving}>
+                    <button
+                        onClick={onRegenerate}
+                        className="regenerate-btn"
+                        disabled={isSaving}
+                    >
                         Regenerate All
                     </button>
                 </div>
@@ -101,10 +125,7 @@ function QuizReview({
         );
     }
 
-    // --- Participant's post-game review logic ---
-=======
-function QuizReview({ quizData, myAnswers, onRestart }) {
-
+    // Participant's post-quiz review mode
     return (
         <div className="quiz-review">
             <h2>Quiz Review</h2>
@@ -125,11 +146,6 @@ function QuizReview({ quizData, myAnswers, onRestart }) {
                                     } else if (isMyChoice && !isTheCorrectChoice) {
                                         optionClass += ' incorrect';
                                     }
-=======
-                                    
-                                    let optionClass = '';
-                                    if (isTheCorrectChoice) optionClass = 'correct';
-                                    else if (isMyChoice && !isCorrect) optionClass = 'incorrect';
 
                                     return (
                                         <div key={option} className={optionClass}>
@@ -138,7 +154,9 @@ function QuizReview({ quizData, myAnswers, onRestart }) {
                                     );
                                 })}
                             </div>
-                            <p className="explanation"><strong>Explanation:</strong> {question.explanation}</p>
+                            <p className="explanation">
+                                <strong>Explanation:</strong> {question.explanation}
+                            </p>
                         </div>
                     );
                 })}
