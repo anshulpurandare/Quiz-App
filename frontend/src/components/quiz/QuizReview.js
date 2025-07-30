@@ -15,12 +15,10 @@ function QuizReview({
     const [isSaving, setIsSaving] = useState(false);
     const [regeneratingIndex, setRegeneratingIndex] = useState(null);
 
-    // Update local quiz data if props change
     useEffect(() => {
         setQuizData(initialQuizData);
     }, [initialQuizData]);
 
-    // Listen for single question updates from the server
     useEffect(() => {
         const handleSingleQuestionUpdated = ({ questionIndex, newQuestion }) => {
             setQuizData(prevData => {
@@ -38,13 +36,11 @@ function QuizReview({
         };
     }, []);
 
-    // Called when host clicks to regenerate a specific question
     const handleRegenerateQuestion = (index) => {
         setRegeneratingIndex(index);
         socket.emit('host-regenerate-single-question', { roomCode, questionIndex: index });
     };
 
-    // Host approves the quiz and starts the game
     const handleApproveAndStart = () => {
         setIsSaving(true);
         socket.emit('host-update-quiz', { roomCode, updatedQuiz: quizData });
@@ -59,7 +55,6 @@ function QuizReview({
     };
 
     if (isHostReview) {
-        // Host review mode - show editable quiz with regenerate buttons
         return (
             <div className="quiz-review-container">
                 <div className="review-header">
@@ -125,7 +120,6 @@ function QuizReview({
         );
     }
 
-    // Participant's post-quiz review mode
     return (
         <div className="quiz-review">
             <h2>Quiz Review</h2>

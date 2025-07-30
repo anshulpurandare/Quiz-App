@@ -1,6 +1,4 @@
-/* src/components/quiz/QuizReview.css */
 
-/* --- General Styles for Both Views --- */
 .quiz-review, .quiz-review-container {
   max-width: 900px;
   margin: 2rem auto;
@@ -18,7 +16,6 @@
   to { opacity: 1; }
 }
 
-/* --- Host Review / Editor Styles --- */
 .quiz-review-container {
   background-color: #f4f7f9;
 }
@@ -106,7 +103,7 @@
   font-family: inherit;
   background-color: #f8f9fa;
   padding: 0.8rem;
-  resize: none; /* disable resizing */
+  resize: none; 
 }
 
 .options-review-list {
@@ -194,8 +191,6 @@
   word-wrap: break-word;
 }
 
-/* (The above repeated style blocks appear to be a duplication error; ignoring duplicates.) */
-
 .review-header,
 .options-review-list,
 .question-editor {
@@ -226,7 +221,6 @@
   word-wrap: break-word;
 }
 
-/* Base styles for review items */
 .review-option-item {
   padding: 0.8rem;
   border: 1px solid #e0e0e0;
@@ -236,15 +230,13 @@
   word-wrap: break-word;
 }
 
-/* Highlight correct options */
 .review-option-item.correct {
-  background-color: #d4edda; /* light green */
+  background-color: #d4edda; 
   border-color: #28a745;
   color: #155724;
   font-weight: 600;
 }
 
-/* Action buttons container */
 .review-actions {
   margin-top: 2rem;
   display: flex;
@@ -299,7 +291,6 @@
   user-select: none;
 }
 
-/* Regenerate single question button */
 .regenerate-question-btn {
   background-color: #dc3545;
   color: white;
@@ -320,12 +311,11 @@
   cursor: not-allowed;
 }
 
-/* --- Participant Post-Game Review Styles --- */
 .review-card {
   background: #fff;
   padding: 1.5rem;
   border-radius: 12px;
-  border-left: 5px solid #17a2b8; /* blue accent */
+  border-left: 5px solid #17a2b8; 
   margin-bottom: 1.5rem;
   text-align: left;
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -344,7 +334,6 @@
   margin-top: 1rem;
 }
 
-/* Base option style */
 .review-option {
   padding: 12px 15px;
   margin: 8px 0;
@@ -356,24 +345,21 @@
   transition: all 0.2s ease;
 }
 
-/* Correct answers */
 .review-option.correct {
-  background-color: #27ae60; /* green */
+  background-color: #27ae60;
   border-color: #27ae60;
   color: white;
   font-weight: 700;
 }
 
-/* Incorrect answers */
 .review-option.incorrect {
-  background-color: #e74c3c; /* red */
+  background-color: #e74c3c;
   border-color: #e74c3c;
   color: white;
   font-weight: 700;
   text-decoration: line-through;
 }
 
-/* Explanation text */
 .explanation {
   margin-top: 1rem;
   font-size: 0.95rem;

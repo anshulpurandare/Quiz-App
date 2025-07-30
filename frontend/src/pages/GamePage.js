@@ -11,29 +11,24 @@ import Loader from '../components/common/Loader';
 import './GamePage.css';
 
 function GamePage() {
-  // Core UI state management
   const [view, setView] = useState('lobby');
   const [error, setError] = useState('');
   const [myAnswers, setMyAnswers] = useState([]);
 
-  // User and room metadata
   const [name, setName] = useState('');
   const [isHost, setIsHost] = useState(false);
   const [roomCode, setRoomCode] = useState('');
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [participants, setParticipants] = useState([]);
 
-  // Loading and UI feedback
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
 
-  // Quiz and game data
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [correctAnswer, setCorrectAnswer] = useState('');
   const [fullQuizData, setFullQuizData] = useState(null);
 
-  // Setup socket event listeners once and clean up properly
   useEffect(() => {
     function setupSocketListeners() {
       socket.on('update-participants', setParticipants);
@@ -86,7 +81,6 @@ function GamePage() {
     };
   }, [isHost]);
 
-  // Create a new room and become host
   const handleCreateRoom = () => {
     setLoadingMessage('Creating Room...');
     setLoading(true);
@@ -102,7 +96,6 @@ function GamePage() {
     });
   };
 
-  // Join an existing room as participant
   const handleJoinRoom = (e) => {
     e.preventDefault();
     setError('');
@@ -127,17 +120,14 @@ function GamePage() {
     }
   };
 
-  // Called after participant submits answer
   const handleQuizSubmit = () => {
     setView('waiting_results');
   };
 
-  // Transition to quiz review at end
   const handleShowReview = () => {
     setView('quiz_review');
   };
 
-  // Reset everything to initial state and show lobby
   const handleRestart = () => {
     setView('lobby');
     setError('');
@@ -153,12 +143,10 @@ function GamePage() {
     setCorrectAnswer('');
   };
 
-  // While loading async operations, show loader overlay
   if (loading) {
     return <Loader message={loadingMessage} />;
   }
 
-  // Lobby screen with join/create room options
   const renderLobby = () => (
     <div className="lobby-container">
       <div className="join-section">
@@ -196,7 +184,6 @@ function GamePage() {
     </div>
   );
 
-  // Main conditional rendering of app views based on `view` state
   const renderContent = () => {
     switch(view) {
       case 'waiting':

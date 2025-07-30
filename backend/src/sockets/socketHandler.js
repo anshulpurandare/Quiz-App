@@ -2,9 +2,6 @@ const { generateQuiz, generateSingleQuestion } = require('../services/aiService'
 
 const rooms = {};
 
-/**
- * Handles the game progression logic toggling between 'question' and 'results' phases.
- */
 function advanceGame(io, roomCode) {
     const room = rooms[roomCode];
     if (!room || !room.quiz) return;
@@ -12,14 +9,12 @@ function advanceGame(io, roomCode) {
     if (room.timer) clearInterval(room.timer);
 
     if (room.phase === 'results') {
-        // Prepare next question
         room.answeredThisRound = [];
         room.answerDistribution = {};
         room.currentQuestionIndex++;
         const questionIndex = room.currentQuestionIndex;
         const question = room.quiz[questionIndex];
 
-        // No more questions → end game
         if (!question) {
             const finalLeaderboard = room.participants.map(p => ({
                 name: p.name,
@@ -52,7 +47,6 @@ function advanceGame(io, roomCode) {
         }, 1000);
 
     } else if (room.phase === 'question') {
-        // Show results for current question
         room.phase = 'results';
         const questionIndex = room.currentQuestionIndex;
         const correctAnswer = room.quiz[questionIndex].correctAnswer;
@@ -64,7 +58,6 @@ function advanceGame(io, roomCode) {
 
         io.to(roomCode).emit('update-leaderboard', leaderboard);
 
-        // Send individual results to each participant
         room.participants.forEach(p => {
             const theirAnswer = room.playerAnswers[p.id]?.[questionIndex] || "No Answer";
             io.to(p.id).emit('question-over', {
@@ -73,7 +66,6 @@ function advanceGame(io, roomCode) {
             });
         });
 
-        // Notify host with no personal answer
         io.to(room.hostId).emit('question-over', {
             correctAnswer,
             yourAnswer: null,
@@ -82,16 +74,10 @@ function advanceGame(io, roomCode) {
         setTimeout(() => advanceGame(io, roomCode), 5000);
     }
 }
-
-/**
- * Initializes Socket.IO server with all event handlers.
- * @param {import('socket.io').Server} io
- */
 function initializeSocket(io) {
     io.on('connection', (socket) => {
         console.log(`User connected with socket ID: ${socket.id}`);
 
-        // Create a room
         socket.on('create-room', (callback) => {
             const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
             socket.join(roomCode);
@@ -115,7 +101,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Participant joins existing room
         socket.on('join-room', ({ roomCode, name }, callback) => {
             const room = rooms[roomCode];
             if (room) {
@@ -136,7 +121,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Host generates the full quiz
         socket.on('host-generate-quiz', async (quizParams) => {
             const { roomCode } = quizParams;
             const room = rooms[roomCode];
@@ -156,7 +140,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Host regenerates the entire quiz
         socket.on('host-regenerate-quiz', async ({ roomCode }) => {
             const room = rooms[roomCode];
             if (room && room.hostId === socket.id && room.quizParams) {
@@ -175,7 +158,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Host updates the quiz after editing
         socket.on('host-update-quiz', ({ roomCode, updatedQuiz }) => {
             const room = rooms[roomCode];
             if (room && room.hostId === socket.id) {
@@ -185,7 +167,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Host regenerates a single question
         socket.on('host-regenerate-single-question', async ({ roomCode, questionIndex }) => {
             const room = rooms[roomCode];
             if (
@@ -213,7 +194,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Host starts the quiz
         socket.on('start-quiz', ({ roomCode, timerDuration }) => {
             const room = rooms[roomCode];
             if (room && room.quiz && room.hostId === socket.id) {
@@ -232,7 +212,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Participant submits an answer
         socket.on('submit-answer', ({ roomCode, questionIndex, answer }) => {
             const room = rooms[roomCode];
             if (
@@ -273,7 +252,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Host skips the current question
         socket.on('host-skip-question', roomCode => {
             const room = rooms[roomCode];
             if (room && room.hostId === socket.id && room.phase === 'question') {
@@ -282,7 +260,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Host ends the quiz early
         socket.on('host-end-quiz', roomCode => {
             const room = rooms[roomCode];
             if (room && room.hostId === socket.id) {
@@ -301,7 +278,6 @@ function initializeSocket(io) {
             }
         });
 
-        // Handle user disconnect
         socket.on('disconnect', () => {
             const disconnectedSocketId = socket.id;
             console.log(`User disconnected: ${disconnectedSocketId}`);
@@ -319,7 +295,6 @@ function initializeSocket(io) {
             const room = rooms[roomCode];
 
             if (room.hostId === disconnectedSocketId) {
-                // Host disconnected — end game for all
                 console.log(`Host disconnected from room [${roomCode}]. Ending game.`);
                 if (room.timer) clearInterval(room.timer);
 
@@ -327,7 +302,6 @@ function initializeSocket(io) {
 
                 delete rooms[roomCode];
             } else {
-                // Participant disconnected — remove from participants
                 const idx = room.participants.findIndex(p => p.id === disconnectedSocketId);
                 if (idx !== -1) {
                     const participantName = room.participants[idx].name;

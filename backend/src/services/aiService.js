@@ -1,23 +1,14 @@
 const { OpenAI } = require('openai');
 
-// Initialize the OpenAI-compatible client configured to use the Hugging Face inference router.
-// Make sure your environment variable HF_TOKEN contains your Hugging Face API key.
 const huggingface = new OpenAI({
   apiKey: process.env.HF_TOKEN,
   baseURL: 'https://router.huggingface.co/v1',
 });
 
 
-/**
- * Extracts a JSON array from raw AI text response.
- * Handles occasional markdown or extra text by extracting the first JSON array found.
- * @param {string} text - Raw string returned by the AI.
- * @returns {object[] | null} - Parsed array of quiz question objects or null if parsing fails.
- */
 function extractJson(text) {
   if (!text) return null;
 
-  // Regex to extract the first JSON array found in the text
   const jsonRegex = /\[[\s\S]*\]/;
   const match = text.match(jsonRegex);
 
@@ -34,15 +25,10 @@ function extractJson(text) {
   }
 }
 
-/**
- * Extracts a JSON object from raw AI text response.
- * Similar to extractJson but looking for a single object.
- * @param {string} text - Raw string returned by the AI.
- * @returns {object | null} - Parsed single question object or null if parsing fails.
- */
+
 function extractSingleJson(text) {
   if (!text) return null;
-  const jsonRegex = /\{[\s\S]*\}/; // Matches JSON object
+  const jsonRegex = /\{[\s\S]*\}/;
   const match = text.match(jsonRegex);
 
   if (!match) {
@@ -52,7 +38,6 @@ function extractSingleJson(text) {
 
   try {
     const parsed = JSON.parse(match[0]);
-    // Basic validation
     if (parsed.question && parsed.options && parsed.correctAnswer) {
       return parsed;
     }
@@ -63,11 +48,7 @@ function extractSingleJson(text) {
   }
 }
 
-/**
- * Builds the standardized instruction prompt for quiz generation.
- * @param {object} params - The quiz parameters { topic, subtopics, difficulty, numQuestions }.
- * @returns {string} The fully constructed prompt.
- */
+
 function buildPrompt(params) {
   const { topic, subtopics, difficulty, numQuestions } = params;
 
@@ -98,12 +79,6 @@ Now, generate the quiz based on these rules.
 `.trim();
 }
 
-/**
- * Builds a prompt for generating a single quiz question to replace an existing one.
- * @param {object} params - Original quiz parameters.
- * @param {number} questionIndex - Index of the question for context.
- * @returns {string} The prompt text.
- */
 function buildSingleQuestionPrompt(params, questionIndex) {
   const { topic, subtopics, difficulty } = params;
 
@@ -123,15 +98,10 @@ Now, generate the single best replacement question you can based on these rules.
 `.trim();
 }
 
-/**
- * Attempts to generate a quiz from multiple models in prioritized order.
- * @param {object} params - Quiz generation parameters.
- * @returns {Promise<object[]>} - Promise resolving to quiz data array.
- */
+
 async function generateQuiz(params) {
   const prompt = buildPrompt(params);
 
-  // List of models to try in order of preference
   const modelsToTry = [
     'NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO',
     'zai-org/GLM-4.5:novita',
@@ -171,16 +141,10 @@ async function generateQuiz(params) {
   throw new Error(`Failed to generate quiz after trying all models. Last error: ${lastError.message}`);
 }
 
-/**
- * Attempts to generate a single quiz question from multiple models.
- * @param {object} params - Quiz generation parameters.
- * @param {number} questionIndex - Index of question to replace.
- * @returns {Promise<object>} - Promise resolving to a single quiz question object.
- */
+
 async function generateSingleQuestion(params, questionIndex) {
   const prompt = buildSingleQuestionPrompt(params, questionIndex);
 
-  // Same model fallback list as full quiz generation
   const modelsToTry = [
     'NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO',
     'zai-org/GLM-4.5:novita',
@@ -196,7 +160,7 @@ async function generateSingleQuestion(params, questionIndex) {
       const response = await huggingface.chat.completions.create({
         model,
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.8, // Slightly increased temperature for diversity
+        temperature: 0.8,
         max_tokens: 1024,
       });
 

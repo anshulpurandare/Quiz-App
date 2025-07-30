@@ -8,48 +8,40 @@ function HostDashboard({ roomCode, questionData, participants }) {
   const [answerDistribution, setAnswerDistribution] = useState({});
 
   useEffect(() => {
-    // Handler functions for socket events
     const onTimerTick = (data) => setTimeRemaining(data.remainingTime);
     const onHostUpdate = (data) => {
       setAnsweredIds(data.answeredThisRound);
       setAnswerDistribution(data.answerDistribution);
     };
 
-    // Register socket listeners
     socket.on('timer-tick', onTimerTick);
     socket.on('host-update', onHostUpdate);
 
-    // Cleanup listeners on unmount to prevent leaks and duplicates
     return () => {
       socket.off('timer-tick', onTimerTick);
       socket.off('host-update', onHostUpdate);
     };
   }, []);
 
-  // Reset answer-related state when a new question arrives
   useEffect(() => {
     setAnsweredIds([]);
     setAnswerDistribution({});
   }, [questionData]);
 
-  // Handler to skip current question and jump to results
   const handleSkip = () => {
     socket.emit('host-skip-question', roomCode);
   };
 
-  // Handler to end quiz early for everyone, with confirmation prompt
   const handleEnd = () => {
     if (window.confirm("Are you sure you want to end the quiz for everyone?")) {
       socket.emit('host-end-quiz', roomCode);
     }
   };
 
-  // Calculate how many have answered and progress percentage
   const answeredCount = answeredIds.length;
   const totalParticipants = participants.length;
   const progress = totalParticipants > 0 ? (answeredCount / totalParticipants) * 100 : 0;
 
-  // Render live answer distribution bar chart for each option
   const renderDistributionChart = () => {
     const totalAnswers = Object.values(answerDistribution).reduce((sum, count) => sum + count, 0);
     return (

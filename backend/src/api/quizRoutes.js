@@ -2,7 +2,6 @@ const express = require('express');
 const { generateQuiz } = require('../services/aiService'); // Import the service
 const router = express.Router();
 
-// This route handles POST requests to /quiz
 router.post('/quiz', async (req, res) => {
     console.log("Received request on /quiz endpoint.");
     try {
