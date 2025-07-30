@@ -1,13 +1,148 @@
 /* src/components/quiz/QuizReview.css */
-.quiz-review {
+
+/* --- General Styles for Both Views --- */
+.quiz-review, .quiz-review-container {
   animation: fadeIn 0.5s;
 }
-.quiz-review h2 {
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- Styles for Host's Pre-Game Review & Editor --- */
+.quiz-review-container {
+  padding: 2rem;
+  background-color: #f4f7f9;
+  border-radius: 12px;
+  max-width: 900px;
+  margin: 2rem auto;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.review-header {
   text-align: center;
-  font-size: 2rem;
   margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 1.5rem;
+}
+
+.review-header h2 {
+  font-size: 2.2rem;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.review-header p {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.room-code-display {
+  background-color: #007bff;
+  color: white;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  font-family: 'Courier New', Courier, monospace;
+  margin-left: 0.5rem;
+}
+
+.questions-list {
+  margin-top: 1.5rem;
+}
+
+.question-editor {
+  background: #ffffff;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.question-header h4 {
+  margin: 0;
+  font-size: 1.4rem;
   color: #007bff;
 }
+
+.question-input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: none; /* Often better to disable resize for a clean look */
+  background-color: #f8f9fa;
+}
+
+.options-review-list {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.8rem;
+}
+
+.review-option-item {
+  padding: 0.8rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+}
+
+/* This is the key style for the host's view */
+.review-option-item.correct {
+  background-color: #d4edda; /* Light green */
+  border-color: #28a745;
+  color: #155724;
+  font-weight: 600;
+}
+
+.review-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.review-actions button {
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.approve-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.regenerate-btn {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.regenerate-question-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 0.5rem 1rem;
+}
+
+/* --- Styles for Participant's Post-Game Review --- */
 .review-card {
   background: #fff;
   padding: 1.5rem;
@@ -17,19 +152,44 @@
   text-align: left;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
+
 .review-card h4 {
   margin-top: 0;
   font-size: 1.2rem;
   line-height: 1.5;
 }
-.correct-answer-final {
-  color: #28a745;
-  font-weight: 600;
-  background: #e9f7ef;
-  padding: 0.5rem;
-  border-radius: 4px;
-  display: inline-block;
+
+.options-review {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
+
+.review-option {
+  padding: 12px 15px;
+  margin: 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Key styles for participant's correct vs incorrect answers */
+.review-option.correct {
+  background-color: #27ae60;
+  border-color: #27ae60;
+  color: white;
+  font-weight: 700;
+}
+
+.review-option.incorrect {
+  background-color: #e74c3c;
+  border-color: #e74c3c;
+  color: white;
+  font-weight: 700;
+  text-decoration: line-through;
+}
+
 .explanation {
   margin-top: 1rem;
   font-size: 0.95rem;
@@ -38,33 +198,3 @@
   padding-top: 1rem;
   line-height: 1.6;
 }
-.quiz-review .restart-btn {
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.review-option {
-    padding: 12px 15px;
-    margin: 8px 0;
-    border: 1px solid #4a5070;
-    border-radius: 8px;
-    background-color: #3a3f5c;
-    color: #f0f0f0; /* FIX: Make the default text color light */
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-}
-
-.review-option.correct {
-    background-color: #27ae60; /* A slightly softer, modern green */
-    border-color: #27ae60;
-    color: white;
-    font-weight: 700; /* Make it bold */
-}
-
-.review-option.incorrect {
-    background-color: #e74c3c; /* A slightly softer, modern red */
-    border-color: #e74c3c;
-    color: white;
-    font-weight: 700; /* Make it bold */
-}
-
