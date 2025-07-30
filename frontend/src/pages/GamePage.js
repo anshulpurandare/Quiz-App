@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../socket';
-// Import all view components
 import HostDashboard from '../components/lobby/HostDashboard';
 import HostView from '../components/lobby/HostView';
 import ParticipantView from '../components/lobby/ParticipantView';
@@ -16,7 +15,6 @@ function GamePage() {
     const [error, setError] = useState('');
     const [myAnswers, setMyAnswers] = useState([]);
     
-    // User & Room State
     const [name, setName] = useState('');
     const [isHost, setIsHost] = useState(false);
     const [roomCode, setRoomCode] = useState('');
@@ -25,7 +23,6 @@ function GamePage() {
     const [loading, setLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('');
 
-    // Centralized Quiz & Results State
     const [currentQuestion, setCurrentQuestion] = useState(null);
     const [leaderboard, setLeaderboard] = useState([]);
     const [correctAnswer, setCorrectAnswer] = useState('');
@@ -66,7 +63,6 @@ function GamePage() {
             });
             socket.on('host-disconnected', () => {
                 alert('The host has disconnected. The game has ended. Returning to the main screen.');
-                // Your existing handleRestart function is perfect for resetting the UI.
                 handleRestart(); 
             });
         }
@@ -83,7 +79,6 @@ function GamePage() {
         };
     }, [isHost]);
 
-    // All handler functions are correct
     const handleCreateRoom = () => {
         setLoadingMessage('Creating Room...');
         setLoading(true);
@@ -128,7 +123,6 @@ function GamePage() {
     
     if (loading) { return <Loader message={loadingMessage} />; }
 
-    // In src/pages/GamePage.js
 
     const renderLobby = () => (
         <div className="lobby-container">
@@ -142,7 +136,6 @@ function GamePage() {
                         onChange={(e) => setName(e.target.value)} 
                         required 
                     />
-                    {/* --- THIS IS THE NEW WRAPPER DIV --- */}
                     <div className="form-row">
                         <input 
                             type="text" 

@@ -1,8 +1,8 @@
-require('dotenv').config(); // Make sure dotenv is installed
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors'); // Make sure cors is installed
+const cors = require('cors'); 
 const initializeSocket = require('./sockets/socketHandler');
 
 
@@ -10,7 +10,7 @@ const app = express();
 const server = http.createServer(app);
 
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Allow dev and production
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
     methods: ["GET", "POST"]
 };
 

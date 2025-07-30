@@ -1,5 +1,5 @@
 import React from 'react';
-import './Leaderboard.css'; // We can reuse the same CSS
+import './Leaderboard.css';
 
 function LiveLeaderboard({ leaderboardData, correctAnswer, yourAnswer }) {
   const isCorrect= yourAnswer === correctAnswer;  

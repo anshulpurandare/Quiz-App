@@ -26,7 +26,7 @@ function InteractiveQuiz({ roomCode, questionData, onQuizSubmit }) {
             socket.off('timer-tick');
             socket.off('update-answer-progress');
         };
-    }, []); // This only runs once
+    }, []);
 
     const handleAnswerSelect = (answer) => {
         if (!isAnswered) {

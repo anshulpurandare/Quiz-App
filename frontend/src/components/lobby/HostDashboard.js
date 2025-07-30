@@ -11,7 +11,7 @@ function HostDashboard({ roomCode, questionData, participants }) {
     socket.on('timer-tick', (data) => setTimeRemaining(data.remainingTime));
     socket.on('host-update', (data) => {
         setAnsweredIds(data.answeredThisRound);
-        setAnswerDistribution(data.answerDistribution); // UPDATE a new state
+        setAnswerDistribution(data.answerDistribution);
   });
 
     return () => {
@@ -20,7 +20,6 @@ function HostDashboard({ roomCode, questionData, participants }) {
     };
   }, []);
 
-  // Reset answered list when a new question arrives
   useEffect(() => {
     setAnsweredIds([]);
     setAnswerDistribution({});

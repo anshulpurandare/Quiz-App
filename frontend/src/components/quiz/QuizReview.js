@@ -1,6 +1,5 @@
 import React from 'react';
 import './QuizReview.css';
-// This component now receives 'myAnswers'
 function QuizReview({ quizData, myAnswers, onRestart }) {
     return (
         <div className="quiz-review">
@@ -18,7 +17,6 @@ function QuizReview({ quizData, myAnswers, onRestart }) {
                                     const isMyChoice = option === myAnswerForThisQ;
                                     const isTheCorrectChoice = option === question.correctAnswer;
                                     
-                                    // Determine the class for styling
                                     let optionClass = '';
                                     if (isTheCorrectChoice) optionClass = 'correct';
                                     else if (isMyChoice && !isCorrect) optionClass = 'incorrect';

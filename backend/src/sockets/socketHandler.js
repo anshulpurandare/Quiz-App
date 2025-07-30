@@ -77,11 +77,9 @@ function initializeSocket(io) {
             const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
             socket.join(roomCode);
             rooms[roomCode] = { hostId: socket.id, participants: [], quiz: null, scores: {} };
-            // Only execute the callback if it was actually provided.
             if (callback && typeof callback === 'function') {
                 callback({ roomCode });
             } else {
-                // This log helps with debugging if it happens again.
                 console.log(`Client ${socket.id} created room ${roomCode} but provided no callback.`);
             }
         });
@@ -119,7 +117,6 @@ function initializeSocket(io) {
         socket.on('start-quiz', ({ roomCode, timerDuration }) => {
             const room = rooms[roomCode];
             if (room && room.quiz && room.hostId === socket.id) {
-                // Initialize the game state
                 room.currentQuestionIndex = -1;
                 room.scores = {};
                 room.timerDuration = timerDuration || 15;
@@ -151,7 +148,6 @@ function initializeSocket(io) {
                 if (room.playerAnswers && room.playerAnswers[socket.id]) {
                     room.playerAnswers[socket.id][questionIndex] = answer;
                 }
-                // Notify the host about the new submission
                 io.to(room.hostId).emit('host-update', {
                     answeredThisRound: room.answeredThisRound,
                     answerDistribution: room.answerDistribution
@@ -167,7 +163,6 @@ function initializeSocket(io) {
             const room = rooms[roomCode];
             if (room && room.hostId === socket.id) {
                 console.log(`Host skipped question in room [${roomCode}]`);
-                // Advancing the game from a 'question' phase moves it to 'results'
                 if (room.phase === 'question') {
                     advanceGame(io, roomCode);
                 }
@@ -191,7 +186,6 @@ function initializeSocket(io) {
             console.log(`User disconnected with socket ID: ${socket.id}`);
             const disconnectedSocketId = socket.id;
 
-            // Find the room the disconnected user was in.
             const roomCode = Object.keys(rooms).find(key => {
                 const room = rooms[key];
                 const isParticipant = room.participants.some(p => p.id === disconnectedSocketId);
@@ -205,32 +199,24 @@ function initializeSocket(io) {
 
             const room = rooms[roomCode];
 
-            // --- THIS IS THE LOGIC WE ARE IMPLEMENTING ---
-            // Case 1: The Host disconnected. The game ends.
             if (room.hostId === disconnectedSocketId) {
                 console.log(`Host disconnected from room [${roomCode}]. Ending game for all.`);
                 
-                // Notify all remaining clients that the host left and the game is over.
                 io.to(roomCode).emit('host-disconnected');
 
-                // Clean up the room from memory.
                 if (room.timer) clearInterval(room.timer);
                 delete rooms[roomCode];
             } 
-            // Case 2: A Participant disconnected.
             else {
                 const participantIndex = room.participants.findIndex(p => p.id === disconnectedSocketId);
                 if (participantIndex !== -1) {
                     const participantName = room.participants[participantIndex].name;
                     console.log(`Participant "${participantName}" disconnected from room [${roomCode}].`);
 
-                    // Remove the participant from the list.
                     room.participants.splice(participantIndex, 1);
                     
-                    // Broadcast the updated participant list to everyone in the room.
                     io.to(roomCode).emit('update-participants', room.participants);
 
-                    // If a quiz is in progress, update the live progress indicators.
                     if (room.phase === 'question') {
                         const answeredIndex = room.answeredThisRound.indexOf(disconnectedSocketId);
                         if (answeredIndex > -1) {
@@ -253,7 +239,6 @@ function initializeSocket(io) {
 
     });
 }
-// Add this to the top of the advanceGame function
-// if (room.phase === 'results') { room.answeredThisRound = []; ... }
+
 module.exports = initializeSocket;
 
