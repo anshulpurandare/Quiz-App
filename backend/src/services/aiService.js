@@ -103,10 +103,11 @@ async function generateQuiz(params) {
   const prompt = buildPrompt(params);
 
   const modelsToTry = [
+    'deepseek-ai/DeepSeek-V3-0324',
     'NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO',
     'zai-org/GLM-4.5:novita',
     'google/gemma-7b-it',
-    'Open-Orca/Mistral-7B-OpenOrca'
+    'Open-Orca/Mistral-7B-OpenOrca',
   ];
 
   let lastError = null;
