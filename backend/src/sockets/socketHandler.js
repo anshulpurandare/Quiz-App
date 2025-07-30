@@ -85,6 +85,12 @@ function initializeSocket(io) {
             };
             if (callback && typeof callback === 'function') {
                 callback({ roomCode });
+
+            rooms[roomCode] = { hostId: socket.id, participants: [], quiz: null, scores: {} };
+            if (callback && typeof callback === 'function') {
+                callback({ roomCode });
+            } else {
+                console.log(`Client ${socket.id} created room ${roomCode} but provided no callback.`);
             }
         });
 
@@ -226,6 +232,42 @@ socket.on('submit-answer', ({ roomCode, questionIndex, answer }) => {
         io.to(room.hostId).emit('host-update', {
             answeredThisRound: room.answeredThisRound,
             answerDistribution: room.answerDistribution
+        socket.on('submit-answer', ({ roomCode, questionIndex, answer }) => {
+            const room = rooms[roomCode];
+            if (room && room.quiz && room.quiz[questionIndex] && !room.answeredThisRound.includes(socket.id)) {
+                room.answeredThisRound.push(socket.id);
+                if (!room.answerDistribution[answer]) {
+                    room.answerDistribution[answer] = 0;
+                }
+                room.answerDistribution[answer]++;
+                const isCorrect = room.quiz[questionIndex].correctAnswer === answer;
+                if (isCorrect) {
+                    if (!room.scores[socket.id]) { room.scores[socket.id] = 0; }
+                    room.scores[socket.id]++;
+                }
+                if (room.playerAnswers && room.playerAnswers[socket.id]) {
+                    room.playerAnswers[socket.id][questionIndex] = answer;
+                }
+                io.to(room.hostId).emit('host-update', {
+                    answeredThisRound: room.answeredThisRound,
+                    answerDistribution: room.answerDistribution
+                });
+                 io.to(roomCode).emit('update-answer-progress', {
+                    answeredCount: room.answeredThisRound.length,
+                    totalParticipants: room.participants.length
+                });
+            }
+        });
+        
+        socket.on('host-skip-question', (roomCode) => {
+            const room = rooms[roomCode];
+            if (room && room.hostId === socket.id) {
+                console.log(`Host skipped question in room [${roomCode}]`);
+                if (room.phase === 'question') {
+                    advanceGame(io, roomCode);
+                }
+            }
+
         });
 
         // Send progress update to all clients in the room
@@ -254,6 +296,16 @@ socket.on('host-end-quiz', (roomCode) => {
         
         // Stop any active timers to prevent further state changes
         if (room.timer) clearInterval(room.timer);
+=======
+        socket.on('disconnect', () => {
+            console.log(`User disconnected with socket ID: ${socket.id}`);
+            const disconnectedSocketId = socket.id;
+
+            const roomCode = Object.keys(rooms).find(key => {
+                const room = rooms[key];
+                const isParticipant = room.participants.some(p => p.id === disconnectedSocketId);
+                return room.hostId === disconnectedSocketId || isParticipant;
+            });
 
         // Compile and send the final leaderboard and results
         const finalLeaderboard = room.participants.map(p => ({
@@ -311,6 +363,42 @@ socket.on('disconnect', () => {
                     answeredCount: room.answeredThisRound.length,
                     totalParticipants: room.participants.length
                 });
+=======
+            if (room.hostId === disconnectedSocketId) {
+                console.log(`Host disconnected from room [${roomCode}]. Ending game for all.`);
+                
+                io.to(roomCode).emit('host-disconnected');
+
+                if (room.timer) clearInterval(room.timer);
+                delete rooms[roomCode];
+            } 
+            else {
+                const participantIndex = room.participants.findIndex(p => p.id === disconnectedSocketId);
+                if (participantIndex !== -1) {
+                    const participantName = room.participants[participantIndex].name;
+                    console.log(`Participant "${participantName}" disconnected from room [${roomCode}].`);
+
+                    room.participants.splice(participantIndex, 1);
+                    
+                    io.to(roomCode).emit('update-participants', room.participants);
+
+                    if (room.phase === 'question') {
+                        const answeredIndex = room.answeredThisRound.indexOf(disconnectedSocketId);
+                        if (answeredIndex > -1) {
+                            room.answeredThisRound.splice(answeredIndex, 1);
+                        }
+
+                        io.to(room.hostId).emit('host-update', {
+                            answeredThisRound: room.answeredThisRound,
+                            answerDistribution: room.answerDistribution
+                        });
+                        
+                        io.to(roomCode).emit('update-answer-progress', {
+                            answeredCount: room.answeredThisRound.length,
+                            totalParticipants: room.participants.length
+                        });
+                    }
+                }
             }
         }
     }

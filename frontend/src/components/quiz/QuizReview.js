@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { socket } from '../../socket';
 import './QuizReview.css';
-
 function QuizReview({
     initialQuizData,
     roomCode,
@@ -103,6 +102,9 @@ function QuizReview({
     }
 
     // --- Participant's post-game review logic ---
+=======
+function QuizReview({ quizData, myAnswers, onRestart }) {
+
     return (
         <div className="quiz-review">
             <h2>Quiz Review</h2>
@@ -116,12 +118,19 @@ function QuizReview({
                                 {question.options.map(option => {
                                     const isMyChoice = option === myAnswerForThisQ;
                                     const isTheCorrectChoice = option === question.correctAnswer;
+
                                     let optionClass = 'review-option';
                                     if (isTheCorrectChoice) {
                                         optionClass += ' correct';
                                     } else if (isMyChoice && !isTheCorrectChoice) {
                                         optionClass += ' incorrect';
                                     }
+=======
+                                    
+                                    let optionClass = '';
+                                    if (isTheCorrectChoice) optionClass = 'correct';
+                                    else if (isMyChoice && !isCorrect) optionClass = 'incorrect';
+
                                     return (
                                         <div key={option} className={optionClass}>
                                             {option}

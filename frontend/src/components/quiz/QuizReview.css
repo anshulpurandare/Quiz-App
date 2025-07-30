@@ -1,7 +1,11 @@
+
 /* src/components/quiz/QuizReview.css */
 
 /* --- General Styles for Both Views --- */
 .quiz-review, .quiz-review-container {
+
+.quiz-review {
+
   animation: fadeIn 0.5s;
 }
 
@@ -167,11 +171,21 @@
 }
 
 .review-option {
+
   padding: 12px 15px;
   margin: 0;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   font-weight: 500;
+=======
+    padding: 12px 15px;
+    margin: 8px 0;
+    border: 1px solid #4a5070;
+    border-radius: 8px;
+    background-color: #3a3f5c;
+    color: #f0f0f0; 
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
 }
 
 /* Key styles for participant's correct vs incorrect answers */
@@ -188,6 +202,18 @@
   color: white;
   font-weight: 700;
   text-decoration: line-through;
+=======
+    background-color: #27ae60;
+    border-color: #27ae60;
+    color: white;
+    font-weight: 700;
+}
+
+.review-option.incorrect {
+    background-color: #e74c3c;
+    border-color: #e74c3c;
+    color: white;
+    font-weight: 700;
 }
 
 .explanation {

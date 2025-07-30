@@ -14,6 +14,7 @@ function GamePage() {
     const [view, setView] = useState('lobby');
     const [error, setError] = useState('');
     const [myAnswers, setMyAnswers] = useState([]);
+
     const [name, setName] = useState('');
     const [isHost, setIsHost] = useState(false);
     const [roomCode, setRoomCode] = useState('');
@@ -21,6 +22,7 @@ function GamePage() {
     const [participants, setParticipants] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState('');
+
     const [currentQuestion, setCurrentQuestion] = useState(null);
     const [leaderboard, setLeaderboard] = useState([]);
     const [correctAnswer, setCorrectAnswer] = useState('');
@@ -52,6 +54,9 @@ function GamePage() {
             socket.on('host-disconnected', () => {
                 alert('The host has disconnected. The game has ended.');
                 handleRestart();
+=======
+                alert('The host has disconnected. The game has ended. Returning to the main screen.');
+                handleRestart(); 
             });
         }
         setupSocketListeners();
@@ -125,6 +130,14 @@ function GamePage() {
                 <h3>Join a Quiz</h3>
                 <form onSubmit={handleJoinRoom}>
                     <input type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} required />
+=======
+                    <input 
+                        type="text" 
+                        placeholder="Your Name" 
+                        value={name} 
+                        onChange={(e) => setName(e.target.value)} 
+                        required 
+                    />
                     <div className="form-row">
                         <input type="text" placeholder="Room Code" value={roomCodeInput} onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())} required />
                         <button type="submit">Join</button>

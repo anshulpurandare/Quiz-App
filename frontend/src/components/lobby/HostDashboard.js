@@ -13,6 +13,14 @@ function HostDashboard({ roomCode, questionData, participants }) {
             setAnsweredIds(data.answeredThisRound);
             setAnswerDistribution(data.answerDistribution);
         };
+=======
+  useEffect(() => {
+    socket.on('timer-tick', (data) => setTimeRemaining(data.remainingTime));
+    socket.on('host-update', (data) => {
+        setAnsweredIds(data.answeredThisRound);
+        setAnswerDistribution(data.answerDistribution);
+  });
+
 
         socket.on('timer-tick', onTimerTick);
         socket.on('host-update', onHostUpdate);
@@ -23,11 +31,17 @@ function HostDashboard({ roomCode, questionData, participants }) {
         };
     }, []);
 
+
     // Reset states when a new question arrives
     useEffect(() => {
         setAnsweredIds([]);
         setAnswerDistribution({});
     }, [questionData]);
+=======
+  useEffect(() => {
+    setAnsweredIds([]);
+    setAnswerDistribution({});
+  }, [questionData]);
 
     const handleSkip = () => {
         socket.emit('host-skip-question', roomCode);
