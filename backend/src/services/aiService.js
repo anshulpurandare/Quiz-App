@@ -53,7 +53,7 @@ Instructions:
 1. Generate a valid JSON array containing exactly ${numQuestions} multiple-choice question objects.
 2. Your entire response MUST BE ONLY the JSON array. No extra text, explanation, or markdown.
 3. Each question object must have "question", "options", "correctAnswer", "explanation" keys.
-4. The "correctAnswer" key must exactly match one of the "options".
+4. For the "correctAnswer" field, do NOT use a letter such as "A", "B", "C", or "D". The value MUST be the full, exact answer string from the "options" array (e.g., "A marketplace and civic center for public gatherings").
 Example:
 [
   {

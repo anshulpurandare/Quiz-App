@@ -139,6 +139,36 @@ function initializeSocket(io) {
                 }
             }
         });
+        socket.on('host-uploaded-quiz', ({ roomCode, quiz, timerDuration }) => {
+            const room = rooms[roomCode];
+            if (
+                room &&
+                room.hostId === socket.id &&
+                Array.isArray(quiz) &&
+                quiz.length > 0
+            ) {
+                room.quiz = quiz;
+                room.quizParams = null;
+                room.currentQuestionIndex = -1;
+                room.scores = {};
+                // Make sure timerDuration is always a number
+                room.timerDuration = Number(timerDuration) || 15;
+                room.phase = 'results';
+                room.answeredThisRound = [];
+                room.answerDistribution = {};
+                room.playerAnswers = {};
+                room.participants.forEach(p => {
+                    room.playerAnswers[p.id] = [];
+                });
+                room.playerAnswers[room.hostId] = [];
+                advanceGame(io, roomCode);
+                socket.emit('quiz-review-data', quiz);
+                console.log(`Quiz from file uploaded and started for room ${roomCode} with timerDuration ${room.timerDuration}`);
+            } else {
+                socket.emit('error', { message: 'Could not start quiz: invalid quiz data or permissions.' });
+            }
+        });
+
 
         socket.on('host-regenerate-quiz', async ({ roomCode }) => {
             const room = rooms[roomCode];

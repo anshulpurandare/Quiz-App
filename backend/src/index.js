@@ -4,6 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors'); 
 const initializeSocket = require('./sockets/socketHandler');
+const uploadQuizRoute = require('./api/uploadQuiz.js');
 
 
 const app = express();
@@ -15,6 +16,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(express.json());
+
+app.use('/api/upload-quiz', uploadQuizRoute);
 
 const io = new Server(server, {
     cors: corsOptions 
