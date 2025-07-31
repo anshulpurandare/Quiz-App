@@ -47,7 +47,6 @@ function HostView({ roomCode, participants }) {
         };
     }, []);
 
-    // ------ Prompt-based Flow ------
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setQuizParams(prev => ({ ...prev, [name]: value }));
@@ -71,7 +70,6 @@ function HostView({ roomCode, participants }) {
         socket.emit('host-regenerate-quiz', { roomCode });
     };
 
-    // ----- Start quiz with correct timing -----
     const handleStartQuiz = () => {
         if (fileQuiz) {
             setIsGenerating(true);
@@ -85,7 +83,6 @@ function HostView({ roomCode, participants }) {
         }
     };
 
-    // ------ File-uploaded Flow ------
     const handleFileInputChange = (e) => {
         setFileUploadError('');
         setFileQuiz(null);
@@ -120,7 +117,7 @@ function HostView({ roomCode, participants }) {
             formData.append('timerDuration', fileQuizParams.timerDuration);
 
             const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
-            const url = `${backendUrl}/api/upload-quiz`;
+            const url = backendUrl.replace(/\/+$/, '') + '/api/upload-quiz';
 
             const res = await axios.post(url, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
