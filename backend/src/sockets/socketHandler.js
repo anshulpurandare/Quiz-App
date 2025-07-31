@@ -183,6 +183,7 @@ function initializeSocket(io) {
                     if (newQuestion) {
                         room.quiz[questionIndex] = newQuestion;
                         socket.emit('single-question-updated', { questionIndex, newQuestion });
+                        console.log(newQuestion);
                         console.log(`Question ${questionIndex} for room ${roomCode} regenerated successfully.`);
                     } else {
                         socket.emit('error', { message: 'Failed to generate a valid question.' });

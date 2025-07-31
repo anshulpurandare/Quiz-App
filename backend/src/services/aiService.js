@@ -80,6 +80,7 @@ Instructions:
 1. Generate a single valid JSON object. Your entire response MUST be only this JSON object.
 2. It must have "question", "options", "correctAnswer", "explanation" keys.
 3. "correctAnswer" MUST be one of the "options".
+4. For the "correctAnswer" field, do NOT use a letter such as "A", "B", "C", or "D". The value MUST be the full, exact answer string from the "options" array (e.g., "A marketplace and civic center for public gatherings").
 
 Now, generate the single best replacement question.
 `.trim();
