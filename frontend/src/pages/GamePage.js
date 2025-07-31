@@ -191,9 +191,9 @@ function GamePage() {
           ? <HostView roomCode={roomCode} participants={participants} />
           : <ParticipantView roomCode={roomCode} participants={participants} name={name} />;
       case 'host_monitor':
-        return <HostDashboard roomCode={roomCode} question={currentQuestion} participants={participants} />;
+        return <HostDashboard roomCode={roomCode} questionData={currentQuestion} participants={participants} />;
       case 'quiz':
-        return <InteractiveQuiz roomCode={roomCode} question={currentQuestion} onSubmit={handleQuizSubmit} />;
+        return <InteractiveQuiz roomCode={roomCode} questionData={currentQuestion} onSubmit={handleQuizSubmit} />;
       case 'waiting_results':
         return (
           <div className="waiting-room">
@@ -203,10 +203,10 @@ function GamePage() {
         );
       case 'live_leaderboard': {
         const lastAnswer = myAnswers.length > 0 ? myAnswers[myAnswers.length - 1] : null;
-        return <LiveLeaderboard leaderboard={leaderboard} correctAnswer={correctAnswer} yourAnswer={lastAnswer} />;
+        return <LiveLeaderboard leaderboardData={leaderboard} correctAnswer={correctAnswer} yourAnswer={lastAnswer} />;
       }
       case 'leaderboard':
-        return <Leaderboard leaderboard={leaderboard} onRestart={handleRestart} onReview={handleShowReview} />;
+        return <Leaderboard leaderboardData={leaderboard} onRestart={handleRestart} onReview={handleShowReview} />;
       case 'quiz_review':
         return <QuizReview initialQuizData={fullQuizData} myAnswers={myAnswers} onRestart={handleRestart} />;
       default:
