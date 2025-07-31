@@ -1,22 +1,15 @@
-const { OpenAI } = require('openai');
+require('dotenv').config();
+const axios = require('axios');
 
-const huggingface = new OpenAI({
-  apiKey: process.env.HF_TOKEN,
-  baseURL: 'https://router.huggingface.co/v1',
-});
-
-
+// Utility functions for extracting expected JSON from raw LLM output
 function extractJson(text) {
   if (!text) return null;
-
   const jsonRegex = /\[[\s\S]*\]/;
   const match = text.match(jsonRegex);
-
   if (!match) {
-    console.error("aiService: No JSON array found in the AI response.");
+    console.error("aiService: No JSON array found in AI response.");
     return null;
   }
-
   try {
     return JSON.parse(match[0]);
   } catch (error) {
@@ -25,17 +18,14 @@ function extractJson(text) {
   }
 }
 
-
 function extractSingleJson(text) {
   if (!text) return null;
   const jsonRegex = /\{[\s\S]*\}/;
   const match = text.match(jsonRegex);
-
   if (!match) {
-    console.error("aiService: No JSON object found in the AI text.");
+    console.error("aiService: No JSON object found in AI text.");
     return null;
   }
-
   try {
     const parsed = JSON.parse(match[0]);
     if (parsed.question && parsed.options && parsed.correctAnswer) {
@@ -48,10 +38,9 @@ function extractSingleJson(text) {
   }
 }
 
-
+// Prompt builder utilities
 function buildPrompt(params) {
   const { topic, subtopics, difficulty, numQuestions } = params;
-
   return `
 You are an expert quiz-generating AI. Your task is to create a quiz based on the following specifications.
 
@@ -81,7 +70,6 @@ Now, generate the quiz based on these rules.
 
 function buildSingleQuestionPrompt(params, questionIndex) {
   const { topic, subtopics, difficulty } = params;
-
   return `
 You are an expert quiz-generating AI. Your task is to create exactly ONE high-quality multiple-choice question to replace question number ${questionIndex + 1} in an existing quiz.
 
@@ -98,89 +86,101 @@ Now, generate the single best replacement question you can based on these rules.
 `.trim();
 }
 
+// Main function to call Groq API with OpenAI Chat-compatible interface
+async function callGroqAPI(model, messages, maxTokens) {
+  try {
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/chat/completions?wait_for_completion=true",
+      {
+        model,
+        messages,
+        max_tokens: maxTokens
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 60000,
+      }
+    );
 
+    const choices = response.data.choices;
+    if (!Array.isArray(choices) || choices.length === 0) {
+      console.error("Groq API response data:", response.data);
+      throw new Error("No choices returned from Groq API");
+    }
+    return choices[0].message.content;
+  } catch (err) {
+    if (err.response && err.response.data) {
+      console.error("Groq API HTTP error:", err.response.status, err.response.data);
+      throw new Error(`Groq API HTTP ${err.response.status}: ${JSON.stringify(err.response.data)}`);
+    }
+    console.error("Error calling Groq API:", err.message);
+    throw err;
+  }
+}
+
+// Model fallback logic (select your preferred new Groq models here)
+const modelsToTry = [
+  "meta-llama/llama-4-scout-17b-16e-instruct",
+  "deepseek-r1-distill-llama-70b",
+  "llama-3.3-70b-versatile",
+  "gemma2-9b-it"
+];
+
+// Quiz generator: tries all models in sequence
 async function generateQuiz(params) {
   const prompt = buildPrompt(params);
-
-  const modelsToTry = [
-    'deepseek-ai/DeepSeek-V3-0324',
-    'NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO',
-    'zai-org/GLM-4.5:novita',
-    'google/gemma-7b-it',
-    'Open-Orca/Mistral-7B-OpenOrca',
-  ];
-
   let lastError = null;
-
   for (const model of modelsToTry) {
     console.log(`--- Attempting quiz generation with model: ${model} ---`);
     try {
-      const response = await huggingface.chat.completions.create({
+      const aiText = await callGroqAPI(
         model,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 2048,
-      });
-
-      const rawContent = response.choices[0].message.content;
-      console.log(`--- Raw AI Response from ${model} ---`, rawContent);
-      const quizData = extractJson(rawContent);
-
+        [{ role: "user", content: prompt }],
+        2048
+      );
+      console.log(`--- Raw AI Response from ${model} ---`, aiText);
+      const quizData = extractJson(aiText);
       if (quizData && quizData.length > 0) {
         console.log(`+++ Quiz generation successful with ${model} +++`);
         return quizData;
       }
-
       lastError = new Error(`Model ${model} returned invalid or empty quiz.`);
     } catch (error) {
       console.error(`!!! Quiz generation failed with model ${model}. Error:`, error.message);
       lastError = error;
     }
   }
-
   console.error("All models failed. Throwing last error.");
   throw new Error(`Failed to generate quiz after trying all models. Last error: ${lastError.message}`);
 }
 
-
+// Single question generator
 async function generateSingleQuestion(params, questionIndex) {
   const prompt = buildSingleQuestionPrompt(params, questionIndex);
-
-  const modelsToTry = [
-    'NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO',
-    'zai-org/GLM-4.5:novita',
-    'google/gemma-7b-it',
-    'Open-Orca/Mistral-7B-OpenOrca'
-  ];
-
   let lastError = null;
-
   for (const model of modelsToTry) {
     console.log(`--- Attempting single question generation with model: ${model} ---`);
     try {
-      const response = await huggingface.chat.completions.create({
+      const aiText = await callGroqAPI(
         model,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.8,
-        max_tokens: 1024,
-      });
-
-      const rawContent = response.choices[0].message.content;
-      console.log(`--- Raw AI Response for single question from ${model} ---`, rawContent);
-      const questionObject = extractSingleJson(rawContent);
-
+        [{ role: "user", content: prompt }],
+        1024
+      );
+      console.log(`--- Raw AI Response for single question from ${model} ---`, aiText);
+      const questionObject = extractSingleJson(aiText);
       if (questionObject) {
         console.log(`+++ Single question generation successful with ${model} +++`);
         return questionObject;
       }
-
       lastError = new Error(`Model ${model} returned invalid or empty question.`);
     } catch (error) {
       console.error(`!!! Single question generation failed with model ${model}. Error:`, error.message);
       lastError = error;
     }
   }
-
   console.error("All models failed to generate a single question.");
   throw new Error(`Failed to generate single question after trying all models. Last error: ${lastError.message}`);
 }
