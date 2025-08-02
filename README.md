@@ -1,4 +1,4 @@
-#**AI QUIZ APP**
+# **AI QUIZ APP**
 [Try the live app here..](https://quiz-app-nine-alpha-51.vercel.app/)
 A real-time quiz platform that leverages AI to generate quizzes from topics or PDF documents, featuring multiplayer gameplay with synchronized timers and dynamic leaderboards.
 
