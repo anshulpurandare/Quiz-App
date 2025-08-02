@@ -151,7 +151,6 @@ function initializeSocket(io) {
                 room.quizParams = null;
                 room.currentQuestionIndex = -1;
                 room.scores = {};
-                // Make sure timerDuration is always a number
                 room.timerDuration = Number(timerDuration) || 15;
                 room.phase = 'results';
                 room.answeredThisRound = [];

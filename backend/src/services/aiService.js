@@ -1,7 +1,6 @@
 require('dotenv').config();
 const axios = require('axios');
 
-// Updated to your working production Groq models (in order of preference)
 const modelsToTry = [
   "meta-llama/llama-4-scout-17b-16e-instruct",
   "llama-3.3-70b-versatile",
@@ -11,7 +10,6 @@ const modelsToTry = [
 
 function extractJson(text) {
   if (!text) return null;
-  // Try to find a JSON array anywhere
   const jsonRegex = /\[[\s\S]*\]/;
   const match = text.match(jsonRegex);
   if (!match) return null;

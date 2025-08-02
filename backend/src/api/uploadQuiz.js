@@ -6,8 +6,7 @@ const axios = require("axios");
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Utility: Split text into manageable blocks for LLM context
-function splitTextIntoChunks(text, chunkSize = 2000) {
+function splitTextIntoChunks(text, chunkSize = 4000) {
   const chunks = [];
   for (let i = 0; i < text.length; i += chunkSize) {
     chunks.push(text.slice(i, i + chunkSize));
@@ -17,7 +16,6 @@ function splitTextIntoChunks(text, chunkSize = 2000) {
 
 function extractJson(text) {
   if (!text) return null;
-  // Remove possible code block markers/backticks and trim
   text = text.replace(/``````/g, "").trim();
   const start = text.indexOf("[");
   const end = text.lastIndexOf("]");
@@ -32,8 +30,7 @@ function extractJson(text) {
 }
 
 function isValidQuestionObj(q) {
-  return (
-    q &&
+  return (q &&
     typeof q.question === "string" && q.question.length > 0 &&
     Array.isArray(q.options) &&
     q.options.length === 4 &&
@@ -47,8 +44,6 @@ router.post("/", upload.single("pdf"), async (req, res) => {
   if (!req.file || !(req.file.buffer instanceof Buffer)) {
     return res.status(400).json({ error: "No PDF file uploaded or invalid buffer." });
   }
-
-  // Safely extract params with fallbacks
   const {
     topic = "Uploaded Document",
     subtopics = "General Knowledge",
@@ -57,7 +52,6 @@ router.post("/", upload.single("pdf"), async (req, res) => {
     timerDuration = 15
   } = req.body;
 
-  // Ensure subtopics is an array for prompt building
   let subtopicsArray = Array.isArray(subtopics)
     ? subtopics
     : typeof subtopics === "string"
@@ -72,10 +66,9 @@ router.post("/", upload.single("pdf"), async (req, res) => {
       return res.status(400).json({ error: "Extracted PDF text is empty or too short." });
     }
 
-    const chunks = splitTextIntoChunks(text, 2000);
+    const chunks = splitTextIntoChunks(text, 4000);
     const firstChunk = chunks[0] || "";
 
-    // Prompt includes all quiz params
     const prompt = `
 You are an expert quiz-generating AI. Your task is to create a quiz based on these specifications:
 
@@ -103,8 +96,6 @@ Now, generate the quiz.
 Based ONLY on the following text:
 ${firstChunk}
 `.trim();
-
-    // Call Groq API (customize model if needed)
     const groqRes = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions?wait_for_completion=true",
       {
@@ -128,7 +119,6 @@ ${firstChunk}
     const aiRaw = groqRes.data.choices?.[0]?.message?.content;
     const quizArr = extractJson(aiRaw);
 
-    // Optionally trim whitespace for all options and answer fields
     if (Array.isArray(quizArr)) {
       quizArr.forEach(q => {
         if (Array.isArray(q.options))
@@ -142,7 +132,6 @@ ${firstChunk}
       return res.status(400).json({ error: "AI did not return a valid set of quiz questions." });
     }
 
-    // Validate every question
     for (const q of quizArr) {
       if (!isValidQuestionObj(q)) {
         console.error("Invalid question detected:", q);
@@ -150,8 +139,7 @@ ${firstChunk}
       }
     }
 
-    // Respond with generated quiz and the timer parameter
-    res.json({ quiz: quizArr, timerDuration: Number(timerDuration) });
+    res.json({quiz: quizArr, timerDuration: Number(timerDuration) });
 
   } catch (error) {
     console.error("UploadQuiz error:", error.message, error.stack);

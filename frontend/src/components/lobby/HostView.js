@@ -5,7 +5,6 @@ import './HostView.css';
 import axios from 'axios';
 
 function HostView({ roomCode, participants }) {
-    // ----- PROMPT-BASED (STANDARD) QUIZ GENERATION -----
     const [quizParams, setQuizParams] = useState({
         topic: 'World History',
         subtopics: 'Ancient Rome',
@@ -16,7 +15,6 @@ function HostView({ roomCode, participants }) {
     const [timerDuration, setTimerDuration] = useState(15);
     const [quizForReview, setQuizForReview] = useState(null);
 
-    // ----- FILE UPLOAD-BASED QUIZ GENERATION -----
     const [file, setFile] = useState(null);
     const [fileQuiz, setFileQuiz] = useState(null);
     const [fileUploadError, setFileUploadError] = useState('');
@@ -143,9 +141,7 @@ function HostView({ roomCode, participants }) {
         setIsUploading(false);
     };
 
-    // ---- RENDER: Review view ----
     if (quizForReview || fileQuiz) {
-        // Only show Regenerate for prompt-based quizzes for now.
         return (
             <QuizReview
                 initialQuizData={quizForReview || fileQuiz}
@@ -153,7 +149,6 @@ function HostView({ roomCode, participants }) {
                 isHostReview={true}
                 onRegenerate={quizForReview ? handleRegenerateAll : undefined}
                 onStart={handleStartQuiz}
-                // Optionally: show info if fileQuiz and you want to guide about re-upload for regeneration.
             />
         );
     }
@@ -177,7 +172,6 @@ function HostView({ roomCode, participants }) {
                 </ul>
             </div>
 
-            {/* Section for prompt-based AI quiz generation */}
             <div className="quiz-setup">
                 <h3>Setup Your Quiz</h3>
                 <form onSubmit={handleGenerateQuiz}>
@@ -229,7 +223,6 @@ function HostView({ roomCode, participants }) {
                 </form>
             </div>
 
-            {/* Section for file PDF quiz generation */}
             <div className="file-quiz-setup">
                 <h3>Or Generate Quiz from PDF</h3>
                 <form onSubmit={handleUploadQuizFile}>
@@ -284,7 +277,6 @@ function HostView({ roomCode, participants }) {
                 {fileUploadError && (
                     <p className="file-upload-error">{fileUploadError}</p>
                 )}
-                {/* Optionally preview quiz questions before full review: */}
                 {fileQuiz && (
                     <div className="file-quiz-preview">
                         <h4>Quiz Preview:</h4>
